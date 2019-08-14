@@ -4,7 +4,6 @@
 // current audio functions allow someone to mash audio until the page breaks.  need more advanced audio function
 // full typescript migration/debugging
 
-
 'use strict';
 var audioDiv = document.querySelector('#audioDiv');
 var blackRow = document.querySelector('#blackRow');
@@ -228,14 +227,14 @@ function playerTurn() {
 
 function keyPressInterpret(pressEvent) {
 	console.log('keyboard input: ', pressEvent.key);
-	if (keyboardLayout[pressEvent.key] === 'newGame')
+	if (keyboardLayout.keys[pressEvent.key] === 'newGame')
 		newGame();
-	if (keyboardLayout[pressEvent.key] === 'freePlay')
+	if (keyboardLayout.keys[pressEvent.key] === 'freePlay')
 		freePlay();
-	if (keyboardLayout[pressEvent.key] === 'dvorak') {
+	if (keyboardLayout.name[pressEvent.key] === 'dvorak') {
 		console.log("switch to dvorak");
 		keyboardLayout = dvorakInput;
-	} else if (keyboardLayout[pressEvent.key] === 'qwerty') {
+	} else if (keyboardLayout.keys[pressEvent.key] === 'qwerty') {
 		console.log("switch to qwerty");
 		keyboardLayout = qwertyInput;
 	}

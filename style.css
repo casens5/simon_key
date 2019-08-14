@@ -1,5 +1,7 @@
-body {
+html, body {
   margin: 0 0;
+  height: 100%;
+  width: 100%;
   color: #facade;
 }
 
@@ -33,8 +35,8 @@ body {
 
 #container {
   display: flex;
-  width: 9999px;
-  height: 9999px;
+  width: 100%;
+  height: 100%;
 }
 
 .music-keyboard {
