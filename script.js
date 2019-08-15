@@ -1,5 +1,7 @@
 // to do
 //
+// KEYBOARD INPUT DOESN'T WORK, because of "typeError script.js:176" manual input is ok though?
+//
 // how to load files from separate folder
 // current audio functions allow someone to mash audio until the page breaks.  need more advanced audio function
 // full typescript migration/debugging
@@ -41,9 +43,9 @@ var dvorakInput = {
         'r': 10,
         'n': 11,
         's': 12,
-        'w': 'newGame',
-        'v': 'freePlay',
-        'm': 'qwerty'
+        'w': 20,
+        'v': 21,
+        'm': 22
     }
 };
 var dvorakpermissiveTyping = {
@@ -67,9 +69,9 @@ var qwertyInput = {
         'o': 10,
         'l': 11,
         ';': 12,
-        ',': 'newGame',
-        '.': 'freePlay',
-        'm': 'dvorak'
+        ',': 20,
+        '.': 21,
+        'm': 23 // dvorak
     }
 };
 var keyboardLayout = qwertyInput;
@@ -79,18 +81,18 @@ keyboardSelector.addEventListener('change', function (event) {
     console.log("switch keyboard");
     var selector = event.target.value;
     if (selector === 'qwerty')
-        keyboardLayout.name = qwertyInput;
+        keyboardLayout = qwertyInput;
     dvorakLabels.forEach(function (node) {
         node.classList.add('hidden');
     });
     if (selector === 'dvorak')
-        keyboardLayout.name = dvorakInput;
-    qwertyInput.forEach(function (node) {
+        keyboardLayout = dvorakInput;
+    qwertyLabels.forEach(function (node) {
         node.classList.add('hidden');
     });
 });
 keyInputBox.addEventListener('change', function () {
-    if (keyboardLayout.name === qwertyInput)
+    if (keyboardLayout.name === 'qwerty')
         qwertyLabels.classList.toggle('hidden');
     else
         dvorakLabels.classList.toggle('hidden');
@@ -204,23 +206,23 @@ function playSequence(sequence) {
 function playerTurn() {
     setTimeout(function () { containerDiv.className = 'bg-player-turn'; }, 377);
     console.log("now's your turn");
-    document.onkeypress = keyPressInterpret(pressEvent);
+    document.onkeypress = keyPressInterpret;
 }
 function keyPressInterpret(pressEvent) {
-    console.log('keyboard input: ', pressEvent.key);
-    if (keyboardLayout[pressEvent.key] === 'newGame')
+    console.log('keyboard input: ', keyboardLayout.keys[pressEvent.key]);
+    if (keyboardLayout.keys[pressEvent.key] === 20)
         newGame();
-    if (keyboardLayout[pressEvent.key] === 'freePlay')
+    if (keyboardLayout.keys[pressEvent.key] === 21)
         freePlay();
-    if (keyboardLayout[pressEvent.key] === 'dvorak') {
+    if (keyboardLayout.keys[pressEvent.key] === 23) {
         console.log("switch to dvorak");
         keyboardLayout = dvorakInput;
     }
-    else if (keyboardLayout[pressEvent.key] === 'qwerty') {
+    else if (keyboardLayout.keys[pressEvent.key] === 22) {
         console.log("switch to qwerty");
         keyboardLayout = qwertyInput;
     }
-    hitKey(keyboardLayout[pressEvent.key], true);
+    hitKey(keyboardLayout.keys[pressEvent.key], true);
 }
 ;
 function freePlay() {
@@ -240,7 +242,7 @@ function correctSequence() {
     playerStarted = false;
     setTimeout(playChord, 233, winChord);
     score++;
-    scoreDiv.textContent = score;
+    scoreDiv.textContent = String(score);
     setTimeout(computerTurn, 2197);
 }
 function computerTurn() {
@@ -258,7 +260,7 @@ function newGame() {
     gameSequence = [];
     playerSequenceIndex = -1;
     score = 0;
-    scoreDiv.textContent = score;
+    scoreDiv.textContent = String(score);
     setTimeout(computerTurn, 987);
 }
 function checkMatchingNotes(keyIndex, playerSequenceIndex) {
