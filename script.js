@@ -1,7 +1,5 @@
 // to do
 //
-// KEYBOARD INPUT DOESN'T WORK, because of "typeError script.js:176" manual input is ok though?
-//
 // how to load files from separate folder
 // current audio functions allow someone to mash audio until the page breaks.  need more advanced audio function
 // full typescript migration/debugging
