@@ -1,5 +1,7 @@
 // to do
 //
+// refactor ... everything.  stop using confusing boolean gamestate variables as bandaids and unify the goddamn thing
+//
 // how to load files from separate folder
 // current audio functions allow someone to mash audio until the page breaks.  need more advanced audio function
 // full typescript migration/debugging
@@ -102,7 +104,7 @@ function getKeyByValue(object, value) {
 function toggleLabelVisibility() {
 }
 function replayComputerSequence() {
-    if (!isTheGameOver && !playerStarted) {
+    if (!isTheGameOver && !playerStarted && (gameSequence !== [])) {
         playersTurn = false;
         containerDiv.className = 'bg-computer-turn';
         playSequence(gameSequence.slice().reverse());
@@ -230,7 +232,7 @@ function freePlay() {
     containerDiv.className = 'bg-free-play';
     console.log('play however you like.  there is no rush');
     playChord(freeChord);
-    gameSequence = [null];
+    gameSequence = [];
     playerSequenceIndex = -1;
     playersTurn = true;
     scoreDiv.textContent = null;
