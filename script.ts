@@ -215,12 +215,14 @@ function playSequence(sequence : array) {
   }
   else {
     playerTurn();
-    playersTurn = true;
   }
 }
 
 function playerTurn() {
-  setTimeout(function () { containerDiv.className = 'bg-player-turn'; }, 377);
+  setTimeout(function () {
+		containerDiv.className = 'bg-player-turn';
+		playersTurn = true;
+	}, 377);
   console.log("now's your turn");
   document.onkeypress = keyPressInterpret;
 }
@@ -249,13 +251,13 @@ function freePlay() {
   gameSequence = [null];
   playerSequenceIndex = -1;
   playersTurn = true;
+	scoreDiv.textContent = null;
   document.onkeypress = keyPressInterpret
 }
 
 function correctSequence() {
   containerDiv.className = 'bg-computer-turn';
   console.log('good job bud');
-  playersTurn = false;
 	playerStarted = false;
   setTimeout(playChord, 233, winChord);
   score++;
@@ -272,6 +274,7 @@ function computerTurn() {
 }
 
 function newGame() {
+	playersTurn = false;
   containerDiv.className = 'bg-computer-turn';
   console.log('start new game!!!');
   isTheGameOver = false;
@@ -288,13 +291,14 @@ function checkMatchingNotes(keyIndex : number, playerSequenceIndex : number) {
     gameOver();
   }
   else if (playerSequenceIndex == (gameSequence.length - 1)) {
+		playersTurn = false;
     setTimeout(correctSequence, 233);
   }
 }
 
 function gameOver() {
-  isTheGameOver = true;
   playersTurn = false;
+  isTheGameOver = true;
 	playerStarted = false;
   containerDiv.className = 'bg-game-over';
   console.log('you lose');
