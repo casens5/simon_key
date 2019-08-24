@@ -5,19 +5,19 @@
 // how to load files from separate folder
 // current audio functions allow someone to mash audio until the page breaks.  need more advanced audio function
 // full typescript migration/debugging
-'use strict';
-var audioDiv = document.querySelector('#audioDiv');
-var blackRow = document.querySelector('#blackRow');
-var whiteRow = document.querySelector('#whiteRow');
+"use strict";
+var audioDiv = document.querySelector("#audioDiv");
+var blackRow = document.querySelector("#blackRow");
+var whiteRow = document.querySelector("#whiteRow");
 var qwertyLabels;
 var dvorakLabels;
-var containerDiv = document.querySelector('#container');
-var keyInputBox = document.querySelector('#showKeyInput');
-var newGameBtn = document.querySelector('#newGame');
-var freePlayBtn = document.querySelector('#freePlay');
-var scoreDiv = document.querySelector('#gameScore');
-var keyboardSelector = document.querySelector('#keyboardLayout');
-var replaySequenceBtn = document.querySelector('#replaySequence');
+var containerDiv = document.querySelector("#container");
+var keyInputBox = document.querySelector("#showKeyInput");
+var newGameBtn = document.querySelector("#newGame");
+var freePlayBtn = document.querySelector("#freePlay");
+var scoreDiv = document.querySelector("#gameScore");
+var keyboardSelector = document.querySelector("#keyboardLayout");
+var replaySequenceBtn = document.querySelector("#replaySequence");
 var keyCollection = [];
 var gameSequence = [];
 var playersTurn;
@@ -28,85 +28,84 @@ var winChord = [0, 4, 7, 12];
 var freeChord = [0, 11, 2, 9, 4, 7, 6, 5, 8, 3, 10, 1, 12];
 var score = -1;
 var dvorakInput = {
-    name: 'dvorak',
+    name: "dvorak",
     keys: {
-        'a': 0,
-        ',': 1,
-        'o': 2,
-        '.': 3,
-        'e': 4,
-        'u': 5,
-        'g': 6,
-        'h': 7,
-        'c': 8,
-        't': 9,
-        'r': 10,
-        'n': 11,
-        's': 12,
-        'w': 20,
-        'v': 21,
-        'm': 22
+        a: 0,
+        ",": 1,
+        o: 2,
+        ".": 3,
+        e: 4,
+        u: 5,
+        g: 6,
+        h: 7,
+        c: 8,
+        t: 9,
+        r: 10,
+        n: 11,
+        s: 12,
+        w: 20,
+        v: 21,
+        m: 22 // qwerty
     }
 };
 var dvorakpermissiveTyping = {
-    'i': 7,
-    'y': 6,
-    'd': 5
+    i: 7,
+    y: 6,
+    d: 5
 };
 var qwertyInput = {
-    name: 'qwerty',
+    name: "qwerty",
     keys: {
-        'a': 0,
-        'w': 1,
-        's': 2,
-        'e': 3,
-        'd': 4,
-        'f': 5,
-        'u': 6,
-        'j': 7,
-        'i': 8,
-        'k': 9,
-        'o': 10,
-        'l': 11,
-        ';': 12,
-        ',': 20,
-        '.': 21,
-        'm': 23 // dvorak
+        a: 0,
+        w: 1,
+        s: 2,
+        e: 3,
+        d: 4,
+        f: 5,
+        u: 6,
+        j: 7,
+        i: 8,
+        k: 9,
+        o: 10,
+        l: 11,
+        ";": 12,
+        ",": 20,
+        ".": 21,
+        m: 23 // dvorak
     }
 };
 var keyboardLayout = qwertyInput;
-newGameBtn.addEventListener('click', newGame);
-freePlayBtn.addEventListener('click', freePlay);
-keyboardSelector.addEventListener('change', function (event) {
+newGameBtn.addEventListener("click", newGame);
+freePlayBtn.addEventListener("click", freePlay);
+keyboardSelector.addEventListener("change", function (event) {
     console.log("switch keyboard");
     var selector = event.target.value;
-    if (selector === 'qwerty')
+    if (selector === "qwerty")
         keyboardLayout = qwertyInput;
     dvorakLabels.forEach(function (node) {
-        node.classList.add('hidden');
+        node.classList.add("hidden");
     });
-    if (selector === 'dvorak')
+    if (selector === "dvorak")
         keyboardLayout = dvorakInput;
     qwertyLabels.forEach(function (node) {
-        node.classList.add('hidden');
+        node.classList.add("hidden");
     });
 });
-keyInputBox.addEventListener('change', function () {
-    if (keyboardLayout.name === 'qwerty')
-        qwertyLabels.classList.toggle('hidden');
+keyInputBox.addEventListener("change", function () {
+    if (keyboardLayout.name === "qwerty")
+        qwertyLabels.classList.toggle("hidden");
     else
-        dvorakLabels.classList.toggle('hidden');
+        dvorakLabels.classList.toggle("hidden");
 });
-replaySequenceBtn.addEventListener('click', replayComputerSequence);
+replaySequenceBtn.addEventListener("click", replayComputerSequence);
 function getKeyByValue(object, value) {
     return Object.keys(object).find(function (key) { return object[key] === value; });
 }
-function toggleLabelVisibility() {
-}
+function toggleLabelVisibility() { }
 function replayComputerSequence() {
-    if (!isTheGameOver && !playerStarted && (gameSequence !== [])) {
+    if (!isTheGameOver && !playerStarted && gameSequence !== []) {
         playersTurn = false;
-        containerDiv.className = 'bg-computer-turn';
+        containerDiv.className = "bg-computer-turn";
         playSequence(gameSequence.slice().reverse());
     }
 }
@@ -121,18 +120,18 @@ function generateKeyboard() {
     var whiteLight = 59;
     //someday you can refactor this.  thanks, future me
     blacks.forEach(function (id) {
-        var newDiv = document.createElement('div');
-        var qwertyLabel = document.createElement('span');
-        var dvorakLabel = document.createElement('span');
-        qwertyLabel.classList.add('label', 'qwerty', 'hidden');
-        dvorakLabel.classList.add('label', 'dvorak', 'hidden');
+        var newDiv = document.createElement("div");
+        var qwertyLabel = document.createElement("span");
+        var dvorakLabel = document.createElement("span");
+        qwertyLabel.classList.add("label", "qwerty", "hidden");
+        dvorakLabel.classList.add("label", "dvorak", "hidden");
         qwertyLabel.textContent = getKeyByValue(qwertyInput, id);
         dvorakLabel.textContent = getKeyByValue(dvorakInput, id);
-        newDiv.classList.add('key-' + id, 'key');
-        newDiv.id = 'key' + id;
+        newDiv.classList.add("key-" + id, "key");
+        newDiv.id = "key" + id;
         blackRow.append(newDiv, qwertyLabel, dvorakLabel);
-        newDiv.addEventListener('click', function () {
-            console.log('manual input: ', id);
+        newDiv.addEventListener("click", function () {
+            console.log("manual input: ", id);
             hitKey(id, true);
         });
         newDiv.color = [blackHues.shift(), blackSat, blackLight];
@@ -140,36 +139,38 @@ function generateKeyboard() {
         keyCollection[id] = newDiv;
     });
     whites.forEach(function (id) {
-        var newDiv = document.createElement('div');
-        newDiv.classList.add('key-' + id, 'key');
-        newDiv.id = 'key' + id;
+        var newDiv = document.createElement("div");
+        newDiv.classList.add("key-" + id, "key");
+        newDiv.id = "key" + id;
         whiteRow.appendChild(newDiv);
-        newDiv.addEventListener('click', function () {
-            console.log('manual input: ', id);
+        newDiv.addEventListener("click", function () {
+            console.log("manual input: ", id);
             hitKey(id, true);
         });
         newDiv.color = [whiteHues.shift(), whiteSat, whiteLight];
         newDiv.natural = true;
         keyCollection[id] = newDiv;
     });
-    qwertyLabels = document.querySelectorAll('.qwerty');
-    dvorakLabels = document.querySelectorAll('.dvorak');
+    qwertyLabels = document.querySelectorAll(".qwerty");
+    dvorakLabels = document.querySelectorAll(".dvorak");
 }
 function hitKey(keyIndex, player) {
     if (playersTurn == player) {
-        var audioElement = document.createElement('audio');
-        var source = document.createElement('source');
+        var audioElement = document.createElement("audio");
+        var source = document.createElement("source");
         keyAnimate(keyCollection[keyIndex]);
         audioElement.appendChild(source);
         audioDiv.appendChild(audioElement);
-        source.src = "organ" + keyIndex + ".ogg";
-        source.type = 'audio/ogg';
+        source.src = "./audio/organ" + keyIndex + ".ogg";
+        source.type = "audio/ogg";
         audioElement.play();
-        if (playersTurn && (gameSequence[0] != null)) {
+        if (playersTurn && gameSequence[0] != null) {
             playerSequenceIndex++;
             checkMatchingNotes(keyIndex, playerSequenceIndex);
         }
-        setTimeout(function () { audioElement.remove(); }, 1729);
+        setTimeout(function () {
+            audioElement.remove();
+        }, 1729);
     }
 }
 function keyAnimate(key) {
@@ -182,11 +183,25 @@ function keyAnimate(key) {
     var id = setInterval(animateStep, 19);
     function animateStep() {
         if (lightness == 0) {
-            key.style.background = 'hsl(' + key.color[0] + ', ' + key.color[1] + '%, ' + key.color[2] + '%)';
+            key.style.background =
+                "hsl(" +
+                    key.color[0] +
+                    ", " +
+                    key.color[1] +
+                    "%, " +
+                    key.color[2] +
+                    "%)";
             clearInterval(id);
         }
         else {
-            key.style.background = 'hsl(' + key.color[0] + ', ' + key.color[1] + '%, ' + (key.color[2] + lightness) + '%)';
+            key.style.background =
+                "hsl(" +
+                    key.color[0] +
+                    ", " +
+                    key.color[1] +
+                    "%, " +
+                    (key.color[2] + lightness) +
+                    "%)";
             lightness -= lightStep;
         }
     }
@@ -204,14 +219,14 @@ function playSequence(sequence) {
 }
 function playerTurn() {
     setTimeout(function () {
-        containerDiv.className = 'bg-player-turn';
+        containerDiv.className = "bg-player-turn";
         playersTurn = true;
     }, 377);
     console.log("now's your turn");
     document.onkeypress = keyPressInterpret;
 }
 function keyPressInterpret(pressEvent) {
-    console.log('keyboard input: ', keyboardLayout.keys[pressEvent.key]);
+    console.log("keyboard input: ", keyboardLayout.keys[pressEvent.key]);
     if (keyboardLayout.keys[pressEvent.key] === 20)
         newGame();
     if (keyboardLayout.keys[pressEvent.key] === 21)
@@ -226,11 +241,10 @@ function keyPressInterpret(pressEvent) {
     }
     hitKey(keyboardLayout.keys[pressEvent.key], true);
 }
-;
 function freePlay() {
     isTheGameOver = false;
-    containerDiv.className = 'bg-free-play';
-    console.log('play however you like.  there is no rush');
+    containerDiv.className = "bg-free-play";
+    console.log("play however you like.  there is no rush");
     playChord(freeChord);
     gameSequence = [];
     playerSequenceIndex = -1;
@@ -239,8 +253,8 @@ function freePlay() {
     document.onkeypress = keyPressInterpret;
 }
 function correctSequence() {
-    containerDiv.className = 'bg-computer-turn';
-    console.log('good job bud');
+    containerDiv.className = "bg-computer-turn";
+    console.log("good job bud");
     playerStarted = false;
     setTimeout(playChord, 233, winChord);
     score++;
@@ -256,8 +270,8 @@ function computerTurn() {
 }
 function newGame() {
     playersTurn = false;
-    containerDiv.className = 'bg-computer-turn';
-    console.log('start new game!!!');
+    containerDiv.className = "bg-computer-turn";
+    console.log("start new game!!!");
     isTheGameOver = false;
     playerStarted = false;
     gameSequence = [];
@@ -270,7 +284,7 @@ function checkMatchingNotes(keyIndex, playerSequenceIndex) {
     if (gameSequence[playerSequenceIndex] != keyIndex) {
         gameOver();
     }
-    else if (playerSequenceIndex == (gameSequence.length - 1)) {
+    else if (playerSequenceIndex == gameSequence.length - 1) {
         playersTurn = false;
         setTimeout(correctSequence, 233);
     }
@@ -279,8 +293,8 @@ function gameOver() {
     playersTurn = false;
     isTheGameOver = true;
     playerStarted = false;
-    containerDiv.className = 'bg-game-over';
-    console.log('you lose');
+    containerDiv.className = "bg-game-over";
+    console.log("you lose");
     var root = Math.floor(Math.random() * 13);
     var chord = [root];
     chord.push((root + 1) % 13);
