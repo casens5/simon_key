@@ -6,18 +6,19 @@
 // current audio functions allow someone to mash audio until the page breaks.  need more advanced audio function
 // full typescript migration/debugging
 "use strict";
+// DOM elements
 var audioDiv = document.querySelector("#audioDiv");
 var blackRow = document.querySelector("#blackRow");
 var whiteRow = document.querySelector("#whiteRow");
 var qwertyLabels;
 var dvorakLabels;
 var containerDiv = document.querySelector("#container");
-var keyInputBox = document.querySelector("#showKeyInput");
+var labelVisibilityCheckbox = document.querySelector("#showKeyInput");
 var newGameBtn = document.querySelector("#newGame");
 var freePlayBtn = document.querySelector("#freePlay");
 var scoreDiv = document.querySelector("#gameScore");
-var keyboardSelector = document.querySelector("#keyboardLayout");
-var replaySequenceBtn = document.querySelector("#replaySequence");
+var layoutSelector = document.querySelector("#layoutSelector");
+var replaySequenceBtn = document.querySelector("#replaySequenceBtn");
 var keyCollection = [];
 var gameSequence = [];
 var playersTurn;
@@ -27,7 +28,8 @@ var isTheGameOver = false;
 var winChord = [0, 4, 7, 12];
 var freeChord = [0, 11, 2, 9, 4, 7, 6, 5, 8, 3, 10, 1, 12];
 var score = -1;
-var dvorakInput = {
+var labelsVisible = false;
+var dvorakMap = {
     name: "dvorak",
     keys: {
         a: 0,
@@ -48,12 +50,13 @@ var dvorakInput = {
         m: 22 // qwerty
     }
 };
+// alternate key input that might be helpful, or maybe not?
 var dvorakpermissiveTyping = {
     i: 7,
     y: 6,
     d: 5
 };
-var qwertyInput = {
+var qwertyMap = {
     name: "qwerty",
     keys: {
         a: 0,
@@ -74,24 +77,24 @@ var qwertyInput = {
         m: 23 // dvorak
     }
 };
-var keyboardLayout = qwertyInput;
+var keyboardLayout = qwertyMap;
 newGameBtn.addEventListener("click", newGame);
 freePlayBtn.addEventListener("click", freePlay);
-keyboardSelector.addEventListener("change", function (event) {
-    console.log("switch keyboard");
+layoutSelector.addEventListener("change", function (event) {
     var selector = event.target.value;
+    console.log("switch keyboard to", selector);
     if (selector === "qwerty")
-        keyboardLayout = qwertyInput;
+        keyboardLayout = qwertyMap;
     dvorakLabels.forEach(function (node) {
         node.classList.add("hidden");
     });
     if (selector === "dvorak")
-        keyboardLayout = dvorakInput;
+        keyboardLayout = dvorakMap;
     qwertyLabels.forEach(function (node) {
         node.classList.add("hidden");
     });
 });
-keyInputBox.addEventListener("change", function () {
+labelVisibilityCheckbox.addEventListener("change", function () {
     if (keyboardLayout.name === "qwerty")
         qwertyLabels.classList.toggle("hidden");
     else
@@ -125,8 +128,8 @@ function generateKeyboard() {
         var dvorakLabel = document.createElement("span");
         qwertyLabel.classList.add("label", "qwerty", "hidden");
         dvorakLabel.classList.add("label", "dvorak", "hidden");
-        qwertyLabel.textContent = getKeyByValue(qwertyInput, id);
-        dvorakLabel.textContent = getKeyByValue(dvorakInput, id);
+        qwertyLabel.textContent = getKeyByValue(qwertyMap["keys"], id);
+        dvorakLabel.textContent = getKeyByValue(dvorakMap["keys"], id);
         newDiv.classList.add("key-" + id, "key");
         newDiv.id = "key" + id;
         blackRow.append(newDiv, qwertyLabel, dvorakLabel);
@@ -233,11 +236,11 @@ function keyPressInterpret(pressEvent) {
         freePlay();
     if (keyboardLayout.keys[pressEvent.key] === 23) {
         console.log("switch to dvorak");
-        keyboardLayout = dvorakInput;
+        keyboardLayout = dvorakMap;
     }
     else if (keyboardLayout.keys[pressEvent.key] === 22) {
         console.log("switch to qwerty");
-        keyboardLayout = qwertyInput;
+        keyboardLayout = qwertyMap;
     }
     hitKey(keyboardLayout.keys[pressEvent.key], true);
 }
@@ -261,25 +264,6 @@ function correctSequence() {
     scoreDiv.textContent = String(score);
     setTimeout(computerTurn, 2197);
 }
-function computerTurn() {
-    console.log("now's the computer's turn");
-    playersTurn = false;
-    playerSequenceIndex = -1;
-    gameSequence.push(Math.floor(Math.random() * 13));
-    playSequence(gameSequence.slice().reverse());
-}
-function newGame() {
-    playersTurn = false;
-    containerDiv.className = "bg-computer-turn";
-    console.log("start new game!!!");
-    isTheGameOver = false;
-    playerStarted = false;
-    gameSequence = [];
-    playerSequenceIndex = -1;
-    score = 0;
-    scoreDiv.textContent = String(score);
-    setTimeout(computerTurn, 987);
-}
 function checkMatchingNotes(keyIndex, playerSequenceIndex) {
     if (gameSequence[playerSequenceIndex] != keyIndex) {
         gameOver();
@@ -302,6 +286,25 @@ function gameOver() {
     chord.push((root + 7) % 13);
     chord.push(Math.floor(Math.random() * 13));
     playChord(chord);
+}
+function newGame() {
+    playersTurn = false;
+    containerDiv.className = "bg-computer-turn";
+    console.log("start new game!!!");
+    isTheGameOver = false;
+    playerStarted = false;
+    gameSequence = [];
+    playerSequenceIndex = -1;
+    score = 0;
+    scoreDiv.textContent = String(score);
+    setTimeout(computerTurn, 987);
+}
+function computerTurn() {
+    console.log("now's the computer's turn");
+    playersTurn = false;
+    playerSequenceIndex = -1;
+    gameSequence.push(Math.floor(Math.random() * 13));
+    playSequence(gameSequence.slice().reverse());
 }
 function playChord(chord, step, speed) {
     if (step === void 0) {

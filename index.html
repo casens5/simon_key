@@ -1,34 +1,31 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>simonkey</title>
-  <meta charset="utf-8">
-  <script src="script.js" defer></script>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div id="container" class="container">
-		<div id="audioDiv" class="hidden">
-	  </div>
-    <div id="userSettings" class="user-settings">
-      <select id="keyboardLayout" class="input" name="keyboard">
-       <option value="qwerty">qwerty</option>
-       <option value="dvorak">dvorak</option>
-     </select>
-      <button id="newGame" class="input button">new game</button>
-      <button id="freePlay" class="input button">free play</button>
-      <br>
-      <span id="gameScore"></span>
-      <button id="replaySequence" class="input button">replay</button>
-			<input type="checkbox" id="showKeyInput" class="hidden" value="show keyboard input">
-			<label for="showKeyInput" class="hidden">show keyboard layout</label>
-    </div>
-    <div id="musicKeyboard" class="music-keyboard">
-      <div id="blackRow" class="black-row">
+  <head>
+    <title>simon_key</title>
+    <meta charset="utf-8" />
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="container" class="container">
+      <div id="audioDiv" class="hidden"></div>
+      <div id="userSettings" class="user-settings">
+        <select id="layoutSelector" class="input" name="keyboard">
+          <option value="qwerty">qwerty</option>
+          <option value="dvorak">dvorak</option>
+        </select>
+        <button id="newGame" class="input button">new game</button>
+        <button id="freePlay" class="input button">free play</button>
+        <br />
+        <span id="gameScore"></span>
+        <button id="replaySequenceBtn" class="input button">replay</button>
+        <input type="checkbox" id="showKeyInput" value="show keyboard input" />
+        <label for="showKeyInput">show keyboard layout</label>
       </div>
-      <div id="whiteRow" class="white-row">
+      <div id="musicKeyboard" class="music-keyboard">
+        <div id="blackRow" class="black-row"></div>
+        <div id="whiteRow" class="white-row"></div>
       </div>
     </div>
-  </div>
-</body>
+  </body>
 </html>
