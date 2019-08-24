@@ -105,13 +105,6 @@ function getKeyByValue(object, value) {
     return Object.keys(object).find(function (key) { return object[key] === value; });
 }
 function toggleLabelVisibility() { }
-function replayComputerSequence() {
-    if (!isTheGameOver && !playerStarted && gameSequence !== []) {
-        playersTurn = false;
-        containerDiv.className = "bg-computer-turn";
-        playSequence(gameSequence.slice().reverse());
-    }
-}
 function generateKeyboard() {
     var blacks = [1, 3, null, 6, 8, 10];
     var blackHues = [205, 257, null, 0, 52, 103];
@@ -209,6 +202,19 @@ function keyAnimate(key) {
         }
     }
 }
+function playChord(chord, step, speed) {
+    if (step === void 0) {
+        step = 0;
+    }
+    if (speed === void 0) {
+        speed = 73;
+    }
+    hitKey(chord[step], false);
+    step++;
+    if (step < chord.length) {
+        setTimeout(playChord, speed, chord, step++);
+    }
+}
 function playSequence(sequence) {
     var sequenceCopy = sequence.slice();
     console.log(sequenceCopy);
@@ -220,13 +226,12 @@ function playSequence(sequence) {
         playerTurn();
     }
 }
-function playerTurn() {
-    setTimeout(function () {
-        containerDiv.className = "bg-player-turn";
-        playersTurn = true;
-    }, 377);
-    console.log("now's your turn");
-    document.onkeypress = keyPressInterpret;
+function replayComputerSequence() {
+    if (!isTheGameOver && !playerStarted && gameSequence !== []) {
+        playersTurn = false;
+        containerDiv.className = "bg-computer-turn";
+        playSequence(gameSequence.slice().reverse());
+    }
 }
 function keyPressInterpret(pressEvent) {
     console.log("keyboard input: ", keyboardLayout.keys[pressEvent.key]);
@@ -243,17 +248,6 @@ function keyPressInterpret(pressEvent) {
         keyboardLayout = qwertyMap;
     }
     hitKey(keyboardLayout.keys[pressEvent.key], true);
-}
-function freePlay() {
-    isTheGameOver = false;
-    containerDiv.className = "bg-free-play";
-    console.log("play however you like.  there is no rush");
-    playChord(freeChord);
-    gameSequence = [];
-    playerSequenceIndex = -1;
-    playersTurn = true;
-    scoreDiv.textContent = null;
-    document.onkeypress = keyPressInterpret;
 }
 function correctSequence() {
     containerDiv.className = "bg-computer-turn";
@@ -273,19 +267,16 @@ function checkMatchingNotes(keyIndex, playerSequenceIndex) {
         setTimeout(correctSequence, 233);
     }
 }
-function gameOver() {
-    playersTurn = false;
-    isTheGameOver = true;
-    playerStarted = false;
-    containerDiv.className = "bg-game-over";
-    console.log("you lose");
-    var root = Math.floor(Math.random() * 13);
-    var chord = [root];
-    chord.push((root + 1) % 13);
-    chord.push((root + 6) % 13);
-    chord.push((root + 7) % 13);
-    chord.push(Math.floor(Math.random() * 13));
-    playChord(chord);
+function freePlay() {
+    isTheGameOver = false;
+    containerDiv.className = "bg-free-play";
+    console.log("play however you like.  there is no rush");
+    playChord(freeChord);
+    gameSequence = [];
+    playerSequenceIndex = -1;
+    playersTurn = true;
+    scoreDiv.textContent = null;
+    document.onkeypress = keyPressInterpret;
 }
 function newGame() {
     playersTurn = false;
@@ -299,6 +290,14 @@ function newGame() {
     scoreDiv.textContent = String(score);
     setTimeout(computerTurn, 987);
 }
+function playerTurn() {
+    setTimeout(function () {
+        containerDiv.className = "bg-player-turn";
+        playersTurn = true;
+    }, 377);
+    console.log("now's your turn");
+    document.onkeypress = keyPressInterpret;
+}
 function computerTurn() {
     console.log("now's the computer's turn");
     playersTurn = false;
@@ -306,18 +305,19 @@ function computerTurn() {
     gameSequence.push(Math.floor(Math.random() * 13));
     playSequence(gameSequence.slice().reverse());
 }
-function playChord(chord, step, speed) {
-    if (step === void 0) {
-        step = 0;
-    }
-    if (speed === void 0) {
-        speed = 73;
-    }
-    hitKey(chord[step], false);
-    step++;
-    if (step < chord.length) {
-        setTimeout(playChord, speed, chord, step++);
-    }
+function gameOver() {
+    playersTurn = false;
+    isTheGameOver = true;
+    playerStarted = false;
+    containerDiv.className = "bg-game-over";
+    console.log("you lose");
+    var root = Math.floor(Math.random() * 13);
+    var chord = [root];
+    chord.push((root + 1) % 13);
+    chord.push((root + 6) % 13);
+    chord.push((root + 7) % 13);
+    chord.push(Math.floor(Math.random() * 13));
+    playChord(chord);
 }
 generateKeyboard();
 freePlay();
