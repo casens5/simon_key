@@ -86,17 +86,20 @@ var keyboardLayout = qwertyMap;
 newGameBtn.addEventListener("click", newGame);
 freePlayBtn.addEventListener("click", freePlay);
 layoutSelector.addEventListener("change", function(event) {
-  var selector = event.target.value;
-  console.log("switch keyboard to", selector);
-  if (selector === "qwerty") keyboardLayout = qwertyMap;
+  changeLayout(event.target.value);
+});
+
+function changeLayout(newLayout) {
+  console.log("switch keyboard to", newLayout);
+  if (newLayout === "qwerty") keyboardLayout = qwertyMap;
   labelNodes.dvorak.forEach(function(node) {
     node.classList.add("hidden");
   });
-  if (selector === "dvorak") keyboardLayout = dvorakMap;
+  if (newLayout === "dvorak") keyboardLayout = dvorakMap;
   labelNodes.qwerty.forEach(function(node) {
     node.classList.add("hidden");
   });
-});
+}
 
 labelVisibilityCheckbox.addEventListener("change", function() {});
 
@@ -108,51 +111,63 @@ function getKeyByValue(object, value) {
 
 function toggleLabelVisibility() {}
 
+function generateLabel(labeltext: string, labelGroup: string) {
+  var label = document.createElement("span");
+  label.classList.add("label", labelGroup, "hidden");
+  label.textContent = labeltext;
+  return label;
+}
+
+function generateKeyElement(rowObject, id) {
+  var newDiv = document.createElement("div");
+  var qwertyLabel = generateLabel(
+    getKeyByValue(qwertyMap["keys"], id),
+    "qwerty"
+  );
+  var dvorakLabel = generateLabel(
+    getKeyByValue(dvorakMap["keys"], id),
+    "dvorak"
+  );
+  newDiv.classList.add("key-" + id, "key");
+  newDiv.id = "key" + id;
+  rowObject.append(newDiv, qwertyLabel, dvorakLabel);
+  newDiv.addEventListener("click", function() {
+    console.log("manual input: ", id);
+    hitKey(id, true);
+  });
+  newDiv.color = [
+    rowObject.info.hues.shift(),
+    rowObject.info.sat,
+    rowObject.light
+  ];
+  newDiv.natural = rowObject.info.natural;
+  keyCollection[id] = newDiv;
+}
+
 function generateKeyboard() {
-  var blacks = [1, 3, null, 6, 8, 10];
-  var blackHues = [205, 257, null, 0, 52, 103];
-  var blackSat = 55;
-  var blackLight = 29;
-  var whites = [0, 2, 4, 5, 7, 9, 11, 12];
-  var whiteHues = [0, 51, 103, 154, 206, 257, 308, 0];
-  var whiteSat = 27;
-  var whiteLight = 59;
+  blackRow.info = {
+    ids: [1, 3, null, 6, 8, 10],
+    hues: [205, 257, null, 0, 52, 103],
+    sat: 55,
+    light: 29,
+    natural: false
+  };
+  whiteRow.info = {
+    ids: [0, 2, 4, 5, 7, 9, 11, 12],
+    hues: [0, 51, 103, 154, 206, 257, 308, 0],
+    sat: 27,
+    light: 59,
+    natural: true
+  };
 
-  //someday you can refactor this.  thanks, future me
-
-  blacks.forEach(function(id) {
-    var newDiv = document.createElement("div");
-    var qwertyLabel = document.createElement("span");
-    var dvorakLabel = document.createElement("span");
-    qwertyLabel.classList.add("label", "qwerty", "hidden");
-    dvorakLabel.classList.add("label", "dvorak", "hidden");
-    qwertyLabel.textContent = getKeyByValue(qwertyMap["keys"], id);
-    dvorakLabel.textContent = getKeyByValue(dvorakMap["keys"], id);
-    newDiv.classList.add("key-" + id, "key");
-    newDiv.id = "key" + id;
-    blackRow.append(newDiv, qwertyLabel, dvorakLabel);
-    newDiv.addEventListener("click", function() {
-      console.log("manual input: ", id);
-      hitKey(id, true);
-    });
-    newDiv.color = [blackHues.shift(), blackSat, blackLight];
-    newDiv.natural = false;
-    keyCollection[id] = newDiv;
+  blackRow.info.ids.forEach(function(id) {
+    generateKeyElement(blackRow, id);
   });
 
-  whites.forEach(function(id) {
-    var newDiv = document.createElement("div");
-    newDiv.classList.add("key-" + id, "key");
-    newDiv.id = "key" + id;
-    whiteRow.appendChild(newDiv);
-    newDiv.addEventListener("click", function() {
-      console.log("manual input: ", id);
-      hitKey(id, true);
-    });
-    newDiv.color = [whiteHues.shift(), whiteSat, whiteLight];
-    newDiv.natural = true;
-    keyCollection[id] = newDiv;
+  whiteRow.info.ids.forEach(function(id) {
+    generateKeyElement(whiteRow, id);
   });
+
   labelNodes.qwerty = document.querySelectorAll(".qwerty");
   labelNodes.dvorak = document.querySelectorAll(".dvorak");
 }
@@ -180,6 +195,7 @@ function hitKey(keyIndex, player) {
 function keyAnimate(key) {
   var lightness = 14;
   var lightStep = 1;
+  // despite what typescript claims, key.natural does exist
   if (key.natural) {
     lightness = 28;
     lightStep = 2;
