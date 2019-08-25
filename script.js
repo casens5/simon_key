@@ -1,36 +1,32 @@
 // to do
 //
 // refactor ... everything.  stop using confusing boolean gamestate variables as bandaids and unify the goddamn thing
-//
-// how to load files from separate folder
-// current audio functions allow someone to mash audio until the page breaks.  need more advanced audio function
 // full typescript migration/debugging
+// no keyboard input during gameOver state, which means no newGame, freePlay, etc.
+// holding down a key problem -- can it be fixed without deing onkeyup?
+// better way of loading/playing sounds?
 "use strict";
 // DOM elements
-var audioDiv = document.querySelector("#audioDiv");
-var blackRow = document.querySelector("#blackRow");
-var whiteRow = document.querySelector("#whiteRow");
-var labelNodes = {};
-var containerDiv = document.querySelector("#container");
-var labelVisibilityCheckbox = document.querySelector("#showKeyInput");
-var newGameBtn = document.querySelector("#newGame");
-var freePlayBtn = document.querySelector("#freePlay");
-var scoreDiv = document.querySelector("#gameScore");
-var layoutSelector = document.querySelector("#layoutSelector");
-var replaySequenceBtn = document.querySelector("#replaySequenceBtn");
-var keyCollection = [];
-var gameSequence = [];
-var playersTurn;
-var playerSequenceIndex = -1;
-var playerStarted = false;
-var isTheGameOver = false;
-var winChord = [0, 4, 7, 12];
-var freeChord = [0, 11, 2, 9, 4, 7, 6, 5, 8, 3, 10, 1, 12];
-var score = -1;
-var labelsVisible = false;
-var dvorakMap = {
-    name: "dvorak",
-    keys: {
+var dom = {
+    audioDiv: document.querySelector("#audioDiv"),
+    blackRow: document.querySelector("#blackRow"),
+    whiteRow: document.querySelector("#whiteRow"),
+    containerDiv: document.querySelector("#container"),
+    labelVisibilityCheckbox: document.querySelector("#showKeyInput"),
+    newGameBtn: document.querySelector("#newGame"),
+    freePlayBtn: document.querySelector("#freePlay"),
+    scoreDiv: document.querySelector("#gameScore"),
+    layoutSelector: document.querySelector("#layoutSelector"),
+    replaySequenceBtn: document.querySelector("#replaySequenceBtn"),
+    labelNodes: {},
+    musicKey: []
+};
+var chords = {
+    win: [0, 4, 7, 12],
+    freePlay: [0, 11, 2, 9, 4, 7, 6, 5, 8, 3, 10, 1, 12]
+};
+var layout = {
+    dvorak: {
         a: 0,
         ",": 1,
         o: 2,
@@ -47,17 +43,14 @@ var dvorakMap = {
         w: 20,
         v: 21,
         m: 22 // qwerty
-    }
-};
-// alternate key input that might be helpful, or maybe not?
-var dvorakpermissiveTyping = {
-    i: 7,
-    y: 6,
-    d: 5
-};
-var qwertyMap = {
-    name: "qwerty",
-    keys: {
+    },
+    // alternate key input that might be good UX but idk
+    permissiveDvorak: {
+        i: 7,
+        y: 6,
+        d: 5
+    },
+    qwerty: {
         a: 0,
         w: 1,
         s: 2,
@@ -76,27 +69,37 @@ var qwertyMap = {
         m: 23 // dvorak
     }
 };
-var keyboardLayout = qwertyMap;
-newGameBtn.addEventListener("click", newGame);
-freePlayBtn.addEventListener("click", freePlay);
-layoutSelector.addEventListener("change", function (event) {
+var game = {
+    score: -1,
+    secretSequence: [],
+    labelsVisible: false,
+    layout: layout.qwerty,
+    //what the hell is this?  get this out of here.
+    playersTurn: null,
+    playerSequenceIndex: -1,
+    playerStarted: false,
+    isTheGameOver: false
+};
+dom.newGameBtn.addEventListener("click", newGame);
+dom.freePlayBtn.addEventListener("click", freePlay);
+dom.layoutSelector.addEventListener("change", function (event) {
     changeLayout(event.target.value);
 });
 function changeLayout(newLayout) {
     console.log("switch keyboard to", newLayout);
     if (newLayout === "qwerty")
-        keyboardLayout = qwertyMap;
-    labelNodes.dvorak.forEach(function (node) {
+        game.layout = layout.qwerty;
+    dom.labelNodes.dvorak.forEach(function (node) {
         node.classList.add("hidden");
     });
     if (newLayout === "dvorak")
-        keyboardLayout = dvorakMap;
-    labelNodes.qwerty.forEach(function (node) {
+        game.layout = layout.dvorak;
+    dom.labelNodes.qwerty.forEach(function (node) {
         node.classList.add("hidden");
     });
 }
-labelVisibilityCheckbox.addEventListener("change", function () { });
-replaySequenceBtn.addEventListener("click", replayComputerSequence);
+dom.labelVisibilityCheckbox.addEventListener("change", function () { });
+dom.replaySequenceBtn.addEventListener("click", replayComputerSequence);
 function getKeyByValue(object, value) {
     return Object.keys(object).find(function (key) { return object[key] === value; });
 }
@@ -109,8 +112,8 @@ function generateLabel(labeltext, labelGroup) {
 }
 function generateKeyElement(rowObject, id) {
     var newDiv = document.createElement("div");
-    var qwertyLabel = generateLabel(getKeyByValue(qwertyMap["keys"], id), "qwerty");
-    var dvorakLabel = generateLabel(getKeyByValue(dvorakMap["keys"], id), "dvorak");
+    var qwertyLabel = generateLabel(getKeyByValue(layout.qwerty, id), "qwerty");
+    var dvorakLabel = generateLabel(getKeyByValue(layout.dvorak, id), "dvorak");
     newDiv.classList.add("key-" + id, "key");
     newDiv.id = "key" + id;
     rowObject.append(newDiv, qwertyLabel, dvorakLabel);
@@ -124,45 +127,45 @@ function generateKeyElement(rowObject, id) {
         rowObject.info.light
     ];
     newDiv.natural = rowObject.info.natural;
-    keyCollection[id] = newDiv;
+    dom.musicKey[id] = newDiv;
 }
 function generateKeyboard() {
-    blackRow.info = {
+    dom.blackRow.info = {
         ids: [1, 3, null, 6, 8, 10],
         hues: [205, 257, null, 0, 52, 103],
         sat: 55,
         light: 29,
         natural: false
     };
-    whiteRow.info = {
+    dom.whiteRow.info = {
         ids: [0, 2, 4, 5, 7, 9, 11, 12],
         hues: [0, 51, 103, 154, 206, 257, 308, 0],
         sat: 27,
         light: 59,
         natural: true
     };
-    blackRow.info.ids.forEach(function (id) {
-        generateKeyElement(blackRow, id);
+    dom.blackRow.info.ids.forEach(function (id) {
+        generateKeyElement(dom.blackRow, id);
     });
-    whiteRow.info.ids.forEach(function (id) {
-        generateKeyElement(whiteRow, id);
+    dom.whiteRow.info.ids.forEach(function (id) {
+        generateKeyElement(dom.whiteRow, id);
     });
-    labelNodes.qwerty = document.querySelectorAll(".qwerty");
-    labelNodes.dvorak = document.querySelectorAll(".dvorak");
+    dom.labelNodes.qwerty = document.querySelectorAll(".qwerty");
+    dom.labelNodes.dvorak = document.querySelectorAll(".dvorak");
 }
-function hitKey(keyIndex, player) {
-    if (playersTurn == player) {
+function hitKey(keyId, player) {
+    if (game.playersTurn == player) {
         var audioElement = document.createElement("audio");
         var source = document.createElement("source");
-        keyAnimate(keyCollection[keyIndex]);
+        keyAnimate(dom.musicKey[keyId]);
         audioElement.appendChild(source);
-        audioDiv.appendChild(audioElement);
-        source.src = "./audio/organ" + keyIndex + ".ogg";
+        dom.audioDiv.appendChild(audioElement);
+        source.src = "./audio/organ" + keyId + ".ogg";
         source.type = "audio/ogg";
         audioElement.play();
-        if (playersTurn && gameSequence[0] != null) {
-            playerSequenceIndex++;
-            checkMatchingNotes(keyIndex, playerSequenceIndex);
+        if (game.playersTurn && game.secretSequence[0] != null) {
+            game.playerSequenceIndex++;
+            checkMatchingNotes(keyId);
         }
         setTimeout(function () {
             audioElement.remove();
@@ -219,7 +222,7 @@ function playChord(chord, step, speed) {
 function playSequence(sequence) {
     var sequenceCopy = sequence.slice();
     console.log(sequenceCopy);
-    hitKey(sequenceCopy.pop(), false);
+    hitKey(sequenceCopy.shift(), false);
     if (sequenceCopy.length > 0) {
         setTimeout(playSequence, 843, sequenceCopy);
     }
@@ -228,97 +231,101 @@ function playSequence(sequence) {
     }
 }
 function replayComputerSequence() {
-    if (!isTheGameOver && !playerStarted && gameSequence !== []) {
-        playersTurn = false;
-        containerDiv.className = "bg-computer-turn";
-        playSequence(gameSequence.slice().reverse());
+    if (!game.isTheGameOver &&
+        !game.playerStarted &&
+        game.secretSequence !== []) {
+        game.playersTurn = false;
+        dom.containerDiv.className = "bg-computer-turn";
+        playSequence(game.secretSequence);
     }
 }
 function keyPressInterpret(pressEvent) {
-    console.log("keyboard input: ", keyboardLayout.keys[pressEvent.key]);
-    if (keyboardLayout.keys[pressEvent.key] === 20)
+    console.log("keyboard input: ", game.layout[pressEvent.key]);
+    if (game.layout[pressEvent.key] === 20)
         newGame();
-    if (keyboardLayout.keys[pressEvent.key] === 21)
+    if (game.layout[pressEvent.key] === 21)
         freePlay();
-    if (keyboardLayout.keys[pressEvent.key] === 23) {
+    if (game.layout[pressEvent.key] === 23) {
         console.log("switch to dvorak");
-        keyboardLayout = dvorakMap;
+        game.layout = layout.dvorak;
     }
-    else if (keyboardLayout.keys[pressEvent.key] === 22) {
+    else if (game.layout[pressEvent.key] === 22) {
         console.log("switch to qwerty");
-        keyboardLayout = qwertyMap;
+        game.layout = layout.qwerty;
     }
-    hitKey(keyboardLayout.keys[pressEvent.key], true);
+    hitKey(game.layout[pressEvent.key], true);
 }
 function correctSequence() {
-    containerDiv.className = "bg-computer-turn";
+    dom.containerDiv.className = "bg-computer-turn";
     console.log("good job bud");
-    playerStarted = false;
-    setTimeout(playChord, 233, winChord);
-    score++;
-    scoreDiv.textContent = String(score);
+    game.playerStarted = false;
+    setTimeout(playChord, 233, chords.win);
+    game.score++;
+    dom.scoreDiv.textContent = String(game.score);
     setTimeout(computerTurn, 2197);
 }
-function checkMatchingNotes(keyIndex, playerSequenceIndex) {
-    if (gameSequence[playerSequenceIndex] != keyIndex) {
+function checkMatchingNotes(keyId) {
+    if (game.secretSequence[game.playerSequenceIndex] != keyId) {
         gameOver();
     }
-    else if (playerSequenceIndex == gameSequence.length - 1) {
-        playersTurn = false;
+    else if (game.playerSequenceIndex == game.secretSequence.length - 1) {
+        game.playersTurn = false;
         setTimeout(correctSequence, 233);
     }
 }
 function freePlay() {
-    isTheGameOver = false;
-    containerDiv.className = "bg-free-play";
+    game.isTheGameOver = false;
+    dom.containerDiv.className = "bg-free-play";
     console.log("play however you like.  there is no rush");
-    playChord(freeChord);
-    gameSequence = [];
-    playerSequenceIndex = -1;
-    playersTurn = true;
-    scoreDiv.textContent = null;
+    playChord(chords.freePlay);
+    game.secretSequence = [];
+    game.playerSequenceIndex = -1;
+    game.playersTurn = true;
+    game.score = null;
+    dom.scoreDiv.textContent = null;
     document.onkeypress = keyPressInterpret;
 }
 function newGame() {
-    playersTurn = false;
-    containerDiv.className = "bg-computer-turn";
+    game.playersTurn = false;
+    dom.containerDiv.className = "bg-computer-turn";
     console.log("start new game!!!");
-    isTheGameOver = false;
-    playerStarted = false;
-    gameSequence = [];
-    playerSequenceIndex = -1;
-    score = 0;
-    scoreDiv.textContent = String(score);
+    game.isTheGameOver = false;
+    game.playerStarted = false;
+    game.secretSequence = [];
+    game.playerSequenceIndex = -1;
+    game.score = 0;
+    dom.scoreDiv.textContent = String(game.score);
     setTimeout(computerTurn, 987);
 }
 function playerTurn() {
     setTimeout(function () {
-        containerDiv.className = "bg-player-turn";
-        playersTurn = true;
+        dom.containerDiv.className = "bg-player-turn";
+        game.playersTurn = true;
     }, 377);
     console.log("now's your turn");
     document.onkeypress = keyPressInterpret;
 }
 function computerTurn() {
     console.log("now's the computer's turn");
-    playersTurn = false;
-    playerSequenceIndex = -1;
-    gameSequence.push(Math.floor(Math.random() * 13));
-    playSequence(gameSequence.slice().reverse());
+    game.playersTurn = false;
+    game.playerSequenceIndex = -1;
+    game.secretSequence.push(Math.floor(Math.random() * 13));
+    playSequence(game.secretSequence);
 }
 function gameOver() {
-    playersTurn = false;
-    isTheGameOver = true;
-    playerStarted = false;
-    containerDiv.className = "bg-game-over";
+    game.playersTurn = false;
+    game.isTheGameOver = true;
+    game.playerStarted = false;
+    dom.containerDiv.className = "bg-game-over";
     console.log("you lose");
     var root = Math.floor(Math.random() * 13);
-    var chord = [root];
-    chord.push((root + 1) % 13);
-    chord.push((root + 6) % 13);
-    chord.push((root + 7) % 13);
-    chord.push(Math.floor(Math.random() * 13));
-    playChord(chord);
+    var badChord = [root];
+    badChord.push((root + 6) % 13);
+    badChord.push(Math.floor(Math.random() * 13));
+    badChord.push((root + 1) % 13);
+    badChord.push((root + 7) % 13);
+    playChord(badChord);
 }
+// game init
 generateKeyboard();
 freePlay();
