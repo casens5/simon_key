@@ -82,6 +82,7 @@ var game = {
 };
 dom.newGameBtn.addEventListener("click", newGame);
 dom.freePlayBtn.addEventListener("click", freePlay);
+dom.replaySequenceBtn.addEventListener("click", replayComputerSequence);
 dom.layoutSelector.addEventListener("change", function (event) {
     changeLayout(event.target.value);
 });
@@ -99,11 +100,11 @@ function changeLayout(newLayout) {
     });
 }
 dom.labelVisibilityCheckbox.addEventListener("change", function () { });
-dom.replaySequenceBtn.addEventListener("click", replayComputerSequence);
+function toggleLabelVisibility() { }
 function getKeyByValue(object, value) {
     return Object.keys(object).find(function (key) { return object[key] === value; });
 }
-function toggleLabelVisibility() { }
+// create dom element for keyboard input => musical key
 function generateLabel(labeltext, labelGroup) {
     var label = document.createElement("span");
     label.classList.add("label", labelGroup, "hidden");
@@ -112,6 +113,7 @@ function generateLabel(labeltext, labelGroup) {
 }
 function generateKeyElement(rowObject, id) {
     var newDiv = document.createElement("div");
+    // grabs the keyboard input that triggers the given music key
     var qwertyLabel = generateLabel(getKeyByValue(layout.qwerty, id), "qwerty");
     var dvorakLabel = generateLabel(getKeyByValue(layout.dvorak, id), "dvorak");
     newDiv.classList.add("key-" + id, "key");
@@ -122,7 +124,7 @@ function generateKeyElement(rowObject, id) {
         hitKey(id, true);
     });
     newDiv.color = [
-        rowObject.info.hues.shift(),
+        rowObject.info.hues[id],
         rowObject.info.sat,
         rowObject.info.light
     ];
@@ -132,14 +134,29 @@ function generateKeyElement(rowObject, id) {
 function generateKeyboard() {
     dom.blackRow.info = {
         ids: [1, 3, null, 6, 8, 10],
-        hues: [205, 257, null, 0, 52, 103],
+        hues: {
+            1: 205,
+            3: 257,
+            6: 0,
+            8: 52,
+            10: 103
+        },
         sat: 55,
         light: 29,
         natural: false
     };
     dom.whiteRow.info = {
         ids: [0, 2, 4, 5, 7, 9, 11, 12],
-        hues: [0, 51, 103, 154, 206, 257, 308, 0],
+        hues: {
+            0: 0,
+            2: 51,
+            4: 103,
+            5: 154,
+            7: 206,
+            9: 257,
+            11: 308,
+            12: 0
+        },
         sat: 27,
         light: 59,
         natural: true
