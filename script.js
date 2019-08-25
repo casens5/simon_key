@@ -121,7 +121,7 @@ function generateKeyElement(rowObject, id) {
     newDiv.color = [
         rowObject.info.hues.shift(),
         rowObject.info.sat,
-        rowObject.light
+        rowObject.info.light
     ];
     newDiv.natural = rowObject.info.natural;
     keyCollection[id] = newDiv;
