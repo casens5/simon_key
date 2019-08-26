@@ -74,16 +74,14 @@ var layout = {
 };
 
 var game = {
-  score: -1, //why -1?  surely we can do better
+  score: 0, //why -1?  surely we can do better
   secretSequence: [],
   labelsVisible: false,
   layout: layout.qwerty,
-
-  //what the hell is this?  get this out of here.
-  playersTurn: null,
-  playerSequenceIndex: -1,
-  playerStarted: false,
-  isTheGameOver: false
+  playerTurn: true,
+  computerTempo: 784,
+  playerSequenceIndex: 0,
+  freePlay: true
 };
 
 dom.newGameBtn.addEventListener("click", newGame);
@@ -131,7 +129,7 @@ function generateKeyElement(rowObject, id) {
   rowObject.append(newDiv, qwertyLabel, dvorakLabel);
   newDiv.addEventListener("click", function() {
     console.log("manual input: ", id);
-    hitKey(id, true);
+    keyPressInterpret(id);
   });
   newDiv.color = [
     rowObject.info.hues[id],
@@ -185,26 +183,6 @@ function generateKeyboard() {
   dom.labelNodes.dvorak = document.querySelectorAll(".dvorak");
 }
 
-function hitKey(keyId, player) {
-  if (game.playersTurn == player) {
-    var audioElement = document.createElement("audio");
-    var source = document.createElement("source");
-    keyAnimate(dom.musicKey[keyId]);
-    audioElement.appendChild(source);
-    dom.audioDiv.appendChild(audioElement);
-    source.src = `./audio/organ${keyId}.ogg`;
-    source.type = "audio/ogg";
-    audioElement.play();
-    if (game.playersTurn && game.secretSequence[0] != null) {
-      game.playerSequenceIndex++;
-      checkMatchingNotes(keyId);
-    }
-    setTimeout(() => {
-      audioElement.remove();
-    }, 1729);
-  }
-}
-
 function keyAnimate(key) {
   var lightness = 14;
   var lightStep = 1;
@@ -239,97 +217,112 @@ function keyAnimate(key) {
   }
 }
 
-function playChord(chord, step, speed) {
-  if (step === void 0) {
-    step = 0;
-  }
-  if (speed === void 0) {
-    speed = 73;
-  }
-  hitKey(chord[step], false);
-  step++;
-  if (step < chord.length) {
-    setTimeout(playChord, speed, chord, step++);
-  }
-}
-
-function playSequence(sequence) {
-  var sequenceCopy = sequence.slice();
-  console.log(sequenceCopy);
-  hitKey(sequenceCopy.shift(), false);
-  if (sequenceCopy.length > 0) {
-    setTimeout(playSequence, 843, sequenceCopy);
-  } else {
-    playerTurn();
-  }
-}
-
-function replayComputerSequence() {
-  if (
-    !game.isTheGameOver &&
-    !game.playerStarted &&
-    game.secretSequence !== []
-  ) {
-    game.playersTurn = false;
-    dom.containerDiv.className = "bg-computer-turn";
-    playSequence(game.secretSequence);
+function keyPressInterpret(idInput) {
+  switch (idInput) {
+    case 20:
+      newGame();
+      break;
+    case 21:
+      freePlay();
+      break;
+    case 23:
+      console.log("switch to dvorak");
+      game.layout = layout.dvorak;
+      break;
+    case 22:
+      console.log("switch to qwerty");
+      game.layout = layout.qwerty;
+      break;
+    default:
+      if (game.playerTurn) {
+        hitKey(idInput, true);
+        if (!game.freePlay) {
+          checkMatchingNotes(idInput);
+        }
+      }
   }
 }
 
-function keyPressInterpret(pressEvent) {
-  console.log("keyboard input: ", game.layout[pressEvent.key]);
-  if (game.layout[pressEvent.key] === 20) newGame();
-  if (game.layout[pressEvent.key] === 21) freePlay();
-  if (game.layout[pressEvent.key] === 23) {
-    console.log("switch to dvorak");
-    game.layout = layout.dvorak;
-  } else if (game.layout[pressEvent.key] === 22) {
-    console.log("switch to qwerty");
-    game.layout = layout.qwerty;
+function hitKey(keyId, isFromPlayer) {
+  if (game.playerTurn === isFromPlayer) {
+    var audioElement = document.createElement("audio");
+    var source = document.createElement("source");
+    keyAnimate(dom.musicKey[keyId]);
+    audioElement.appendChild(source);
+    dom.audioDiv.appendChild(audioElement);
+    source.src = `./audio/organ${keyId}.ogg`;
+    source.type = "audio/ogg";
+    audioElement.play();
+    setTimeout(() => {
+      audioElement.remove();
+    }, 1729);
   }
-  hitKey(game.layout[pressEvent.key], true);
-}
-
-function correctSequence() {
-  dom.containerDiv.className = "bg-computer-turn";
-  console.log("good job bud");
-  game.playerStarted = false;
-  setTimeout(playChord, 233, chords.win);
-  game.score++;
-  dom.scoreDiv.textContent = String(game.score);
-  setTimeout(computerTurn, 2197);
 }
 
 function checkMatchingNotes(keyId) {
   if (game.secretSequence[game.playerSequenceIndex] != keyId) {
     gameOver();
   } else if (game.playerSequenceIndex == game.secretSequence.length - 1) {
-    game.playersTurn = false;
+    game.playerTurn = false;
     setTimeout(correctSequence, 233);
+  } else {
+    game.playerSequenceIndex++;
   }
 }
 
+function playChord(chord, step, speed) {
+  hitKey(chord[step], false);
+  step++;
+  if (step < chord.length) {
+    setTimeout(playChord, speed, chord, step, speed);
+  }
+}
+
+function computerPlaySequence(sequence) {
+  var sequenceCopy = sequence.slice();
+  console.log(sequenceCopy);
+  hitKey(sequenceCopy.shift(), false);
+  if (sequenceCopy.length > 0) {
+    setTimeout(computerPlaySequence, game.computerTempo, sequenceCopy);
+  } else {
+    playerTurn();
+  }
+}
+
+function replayComputerSequence() {
+  if (game.playerSequenceIndex === 0 && game.secretSequence !== []) {
+    game.playerTurn = false;
+    dom.containerDiv.className = "bg-computer-turn";
+    computerPlaySequence(game.secretSequence);
+  }
+}
+
+function correctSequence() {
+  game.playerTurn = false;
+  dom.containerDiv.className = "bg-computer-turn";
+  console.log("good job bud");
+  setTimeout(playChord, 233, chords.win, 0, 73);
+  game.score++;
+  dom.scoreDiv.textContent = String(game.score);
+  setTimeout(computerTurn, 1849);
+}
+
 function freePlay() {
-  game.isTheGameOver = false;
   dom.containerDiv.className = "bg-free-play";
   console.log("play however you like.  there is no rush");
-  playChord(chords.freePlay);
-  game.secretSequence = [];
-  game.playerSequenceIndex = -1;
-  game.playersTurn = true;
+  game.playerTurn = true;
+  game.freePlay = true;
   game.score = null;
   dom.scoreDiv.textContent = null;
-  document.onkeypress = keyPressInterpret;
 }
 
 function newGame() {
-  game.playersTurn = false;
+  game.playerTurn = false;
+  game.freePlay = false;
   dom.containerDiv.className = "bg-computer-turn";
   console.log("start new game!!!");
-  game.isTheGameOver = false;
-  game.playerStarted = false;
   game.secretSequence = [];
-  game.playerSequenceIndex = -1;
+  game.playerSequenceIndex = 0;
   game.score = 0;
   dom.scoreDiv.textContent = String(game.score);
   setTimeout(computerTurn, 987);
@@ -338,35 +331,39 @@ function newGame() {
 function playerTurn() {
   setTimeout(function() {
     dom.containerDiv.className = "bg-player-turn";
-    game.playersTurn = true;
+    game.playerTurn = true;
   }, 377);
   console.log("now's your turn");
-  document.onkeypress = keyPressInterpret;
 }
 
 function computerTurn() {
   console.log("now's the computer's turn");
-  game.playersTurn = false;
-  game.playerSequenceIndex = -1;
+  game.playerTurn = false;
+  game.playerSequenceIndex = 0;
+  // add new note to secretSequence
   game.secretSequence.push(Math.floor(Math.random() * 13));
-  playSequence(game.secretSequence);
+  computerPlaySequence(game.secretSequence);
 }
 
 function gameOver() {
-  game.playersTurn = false;
-  game.isTheGameOver = true;
-  game.playerStarted = false;
+  game.playerTurn = false;
   dom.containerDiv.className = "bg-game-over";
+  game.secretSequence = [];
   console.log("you lose");
+  // play that bad chord
   var root = Math.floor(Math.random() * 13);
   var badChord = [root];
   badChord.push((root + 6) % 13);
   badChord.push(Math.floor(Math.random() * 13));
   badChord.push((root + 1) % 13);
   badChord.push((root + 7) % 13);
-  playChord(badChord);
+  playChord(badChord, 0, 73);
 }
 
 // game init
 generateKeyboard();
 freePlay();
+document.onkeypress = function(pressEvent) {
+  console.log("keyboard input:", game.layout[pressEvent.key]);
+  keyPressInterpret(game.layout[pressEvent.key]);
+};
