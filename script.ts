@@ -49,7 +49,8 @@ var layout = {
     s: 12,
     w: 20, // newGame
     v: 21, // freePlay
-    m: 22 // qwerty
+    m: 22, // qwerty
+    b: 24 // labelVisibility
   },
   // alternate key input that might be good UX but idk
   permissiveDvorak: {
@@ -73,7 +74,8 @@ var layout = {
     ";": 12,
     ",": 20, // newGame
     ".": 21, // freePlay
-    m: 23 // dvorak
+    m: 23, // dvorak
+    n: 24 // labelVisibility
   }
 };
 
@@ -97,6 +99,7 @@ dom.layoutSelector.addEventListener("change", function(event) {
 });
 
 document.onkeypress = function(pressEvent) {
+  console.log(pressEvent.key);
   console.log("keyboard input:", game.layout[pressEvent.key]);
   keyPressInterpret(game.layout[pressEvent.key]);
 };
@@ -265,19 +268,24 @@ function keyAnimate(key) {
 
 function keyPressInterpret(idInput) {
   switch (idInput) {
+    //keyboard inputs
     case 20:
       newGame();
       break;
     case 21:
       freePlay();
       break;
-    case 23:
-      changeLayout("dvorak");
-      break;
     case 22:
       changeLayout("qwerty");
       break;
+    case 23:
+      changeLayout("dvorak");
+      break;
+    case 24:
+      toggleLabelVisibility();
+      break;
     default:
+      // music note inputs
       if (game.playerTurn) {
         hitKey(idInput, true);
         if (!game.freePlay) {
