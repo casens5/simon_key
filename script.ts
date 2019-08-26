@@ -1,11 +1,3 @@
-// to do
-//
-// refactor ... everything.  stop using confusing boolean gamestate variables as bandaids and unify the goddamn thing
-// full typescript migration/debugging
-// no keyboard input during gameOver state, which means no newGame, freePlay, etc.
-// holding down a key problem -- can it be fixed without deing onkeyup?
-// better way of loading/playing sounds?
-
 "use strict";
 // DOM elements
 var dom = {

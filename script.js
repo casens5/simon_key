@@ -1,9 +1,11 @@
 // to do
 //
-// refactor ... everything.  stop using confusing boolean gamestate variables as bandaids and unify the goddamn thing
 // full typescript migration/debugging
-// no keyboard input during gameOver state, which means no newGame, freePlay, etc.
-// holding down a key problem -- can it be fixed without deing onkeyup?
+// chrome CSS renders labels at top of element, not bottom.
+// should learn CSS for real and clean up that garbage
+// responsive moblie layout
+// mobile input
+// holding down a key problem -- can it be fixed without doing onkeyup?
 // better way of loading/playing sounds?
 "use strict";
 // DOM elements
