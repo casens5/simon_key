@@ -50,7 +50,8 @@ var layout = {
     w: 20, // newGame
     v: 21, // freePlay
     m: 22, // qwerty
-    b: 24 // labelVisibility
+    b: 24, // labelVisibility
+    x: 25 // replaySequence
   },
   // alternate key input that might be good UX but idk
   permissiveDvorak: {
@@ -75,7 +76,8 @@ var layout = {
     ",": 20, // newGame
     ".": 21, // freePlay
     m: 23, // dvorak
-    n: 24 // labelVisibility
+    n: 24, // labelVisibility
+    b: 25 // replaySequence
   }
 };
 
@@ -276,13 +278,20 @@ function keyPressInterpret(idInput) {
       freePlay();
       break;
     case 22:
+      dom.layoutSelector.value = "qwerty";
       changeLayout("qwerty");
       break;
     case 23:
+      dom.layoutSelector.value = "dvorak";
       changeLayout("dvorak");
       break;
     case 24:
+      dom.labelVisibilityCheckbox.checked = !dom.labelVisibilityCheckbox
+        .checked;
       toggleLabelVisibility();
+      break;
+    case 25:
+      replayComputerSequence();
       break;
     default:
       // music note inputs
