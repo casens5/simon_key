@@ -19,7 +19,11 @@ var dom = {
   scoreDiv: document.querySelector("#gameScore"),
   layoutSelector: document.querySelector("#layoutSelector"),
   replaySequenceBtn: document.querySelector("#replaySequenceBtn"),
-  labelNodes: {},
+  labelNodes: {
+    qwerty: null,
+    dvorak: null
+  },
+  labelsVisible: false,
   musicKey: []
 };
 
@@ -74,10 +78,11 @@ var layout = {
 };
 
 var game = {
-  score: 0, //why -1?  surely we can do better
+  score: 0,
   secretSequence: [],
   labelsVisible: false,
   layout: layout.qwerty,
+  layoutName: "qwerty",
   playerTurn: true,
   computerTempo: 784,
   playerSequenceIndex: 0,
@@ -91,21 +96,61 @@ dom.layoutSelector.addEventListener("change", function(event) {
   changeLayout(event.target.value);
 });
 
+document.onkeypress = function(pressEvent) {
+  console.log("keyboard input:", game.layout[pressEvent.key]);
+  keyPressInterpret(game.layout[pressEvent.key]);
+};
+
 function changeLayout(newLayout) {
   console.log("switch keyboard to", newLayout);
-  if (newLayout === "qwerty") game.layout = layout.qwerty;
-  dom.labelNodes.dvorak.forEach(function(node) {
-    node.classList.add("hidden");
-  });
-  if (newLayout === "dvorak") game.layout = layout.dvorak;
-  dom.labelNodes.qwerty.forEach(function(node) {
-    node.classList.add("hidden");
-  });
+  if (newLayout === "qwerty") {
+    game.layout = layout.qwerty;
+    game.layoutName = "qwerty";
+    if (dom.labelsVisible) {
+      dom.labelNodes.dvorak.forEach(function(node) {
+        node.classList.add("hidden");
+      });
+      dom.labelNodes.qwerty.forEach(function(node) {
+        node.classList.remove("hidden");
+      });
+    }
+  } else {
+    game.layout = layout.dvorak;
+    game.layoutName = "dvorak";
+    if (dom.labelsVisible) {
+      dom.labelNodes.qwerty.forEach(function(node) {
+        node.classList.add("hidden");
+      });
+      dom.labelNodes.dvorak.forEach(function(node) {
+        node.classList.remove("hidden");
+      });
+    }
+  }
 }
 
-dom.labelVisibilityCheckbox.addEventListener("change", function() {});
+dom.labelVisibilityCheckbox.addEventListener("change", toggleLabelVisibility);
 
-function toggleLabelVisibility() {}
+function toggleLabelVisibility() {
+  dom.labelsVisible = !dom.labelsVisible;
+  if (dom.labelsVisible) {
+    if (game.layoutName === "dvorak") {
+      dom.labelNodes.dvorak.forEach(function(node) {
+        node.classList.remove("hidden");
+      });
+    } else {
+      dom.labelNodes.qwerty.forEach(function(node) {
+        node.classList.remove("hidden");
+      });
+    }
+  } else {
+    dom.labelNodes.dvorak.forEach(function(node) {
+      node.classList.add("hidden");
+    });
+    dom.labelNodes.qwerty.forEach(function(node) {
+      node.classList.add("hidden");
+    });
+  }
+}
 
 function getKeyByValue(object, value) {
   return Object.keys(object).find(key => object[key] === value);
@@ -124,9 +169,10 @@ function generateKeyElement(rowObject, id) {
   // grabs the keyboard input that triggers the given music key
   var qwertyLabel = generateLabel(getKeyByValue(layout.qwerty, id), "qwerty");
   var dvorakLabel = generateLabel(getKeyByValue(layout.dvorak, id), "dvorak");
+  newDiv.append(qwertyLabel, dvorakLabel);
   newDiv.classList.add("key-" + id, "key");
   newDiv.id = "key" + id;
-  rowObject.append(newDiv, qwertyLabel, dvorakLabel);
+  rowObject.append(newDiv);
   newDiv.addEventListener("click", function() {
     console.log("manual input: ", id);
     keyPressInterpret(id);
@@ -226,12 +272,10 @@ function keyPressInterpret(idInput) {
       freePlay();
       break;
     case 23:
-      console.log("switch to dvorak");
-      game.layout = layout.dvorak;
+      changeLayout("dvorak");
       break;
     case 22:
-      console.log("switch to qwerty");
-      game.layout = layout.qwerty;
+      changeLayout("qwerty");
       break;
     default:
       if (game.playerTurn) {
@@ -363,7 +407,3 @@ function gameOver() {
 // game init
 generateKeyboard();
 freePlay();
-document.onkeypress = function(pressEvent) {
-  console.log("keyboard input:", game.layout[pressEvent.key]);
-  keyPressInterpret(game.layout[pressEvent.key]);
-};
