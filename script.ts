@@ -229,7 +229,6 @@ function generateKeyboard() {
 function keyAnimate(key) {
   var lightness = 14;
   var lightStep = 1;
-  // despite what typescript claims, key.natural does exist
   if (key.natural) {
     lightness = 28;
     lightStep = 2;
@@ -298,9 +297,9 @@ function keyPressInterpret(idInput) {
 
 function hitKey(keyId, isFromPlayer) {
   if (game.playerTurn === isFromPlayer) {
+    keyAnimate(dom.musicKey[keyId]);
     var audioElement = document.createElement("audio");
     var source = document.createElement("source");
-    keyAnimate(dom.musicKey[keyId]);
     audioElement.appendChild(source);
     dom.audioDiv.appendChild(audioElement);
     source.src = `./audio/organ${keyId}.ogg`;
@@ -343,7 +342,9 @@ function computerPlaySequence(sequence) {
 }
 
 function replayComputerSequence() {
-  if (game.playerSequenceIndex === 0 && game.secretSequence !== []) {
+  if (game.playerSequenceIndex === 0 && game.secretSequence[0] !== undefined) {
+    console.log(game.secretSequence);
+    console.log(game.playerSequenceIndex);
     game.playerTurn = false;
     dom.containerDiv.className = "bg-computer-turn";
     computerPlaySequence(game.secretSequence);
@@ -363,6 +364,8 @@ function correctSequence() {
 function freePlay() {
   dom.containerDiv.className = "bg-free-play";
   console.log("play however you like.  there is no rush");
+  game.secretSequence = [];
+  game.playerSequenceIndex = 0;
   game.playerTurn = true;
   game.freePlay = true;
   game.score = null;
