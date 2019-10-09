@@ -4,7 +4,7 @@
     <title>simon_key</title>
     <meta charset="utf-8" />
     <script src="script.js" defer></script>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="main.css" />
   </head>
   <body>
     <div id="container" class="container">
@@ -14,12 +14,16 @@
           <option value="qwerty">qwerty</option>
           <option value="dvorak">dvorak</option>
         </select>
-        <button id="newGame" class="input button">new game</button>
-        <button id="freePlay" class="input button">free play</button>
+        <button id="newGameBtn" class="input button">new game</button>
+        <button id="freePlayBtn" class="input button">free play</button>
         <br />
-        <span id="gameScore"></span>
+        <span id="scoreDiv"></span>
         <button id="replaySequenceBtn" class="input button">replay</button>
-        <input type="checkbox" id="showKeyInput" value="show keyboard input" />
+        <input
+          type="checkbox"
+          id="labelVisibilityCheckbox"
+          value="show keyboard input"
+        />
         <label for="showKeyInput">show keyboard layout</label>
       </div>
       <div id="musicKeyboard" class="music-keyboard">
