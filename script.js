@@ -206,7 +206,7 @@ function keyAnimate(key) {
     }
     var id = setInterval(animateStep, 19);
     function animateStep() {
-        if (lightness == 0) {
+        if (lightness === 0) {
             key.style = null;
             clearInterval(id);
         }
@@ -274,10 +274,10 @@ function hitKey(keyId, isFromPlayer) {
     }
 }
 function checkMatchingNotes(keyId) {
-    if (game.secretSequence[game.playerSequenceIndex] != keyId) {
+    if (game.secretSequence[game.playerSequenceIndex] !== keyId) {
         gameOver();
     }
-    else if (game.playerSequenceIndex == game.secretSequence.length - 1) {
+    else if (game.playerSequenceIndex === game.secretSequence.length - 1) {
         game.playerTurn = false;
         setTimeout(correctSequence, 233);
     }

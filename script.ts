@@ -1,24 +1,22 @@
 "use strict";
-// DOM elements
 
 function $(id: string) {
   return document.getElementById(id);
 }
 
-var labelElements = {
+const labelElements = {
   qwerty: null,
   dvorak: null
 };
 
-var labelsVisible = false;
-var musicKey = [];
+const musicKey = [];
 
-var chords = {
+const chords = {
   win: [0, 4, 7, 12],
   freePlay: [0, 11, 2, 9, 4, 7, 6, 5, 8, 3, 10, 1, 12]
 };
 
-var layoutMap = {
+const layoutMap = {
   dvorak: {
     a: 0,
     ",": 1,
@@ -67,7 +65,7 @@ var layoutMap = {
   }
 };
 
-var game = {
+const game = {
   score: 0,
   secretSequence: [],
   labelsVisible: false,
@@ -95,7 +93,7 @@ function changeLayout(newLayout: string) {
   console.log("switch keyboard to", newLayout);
   if (newLayout === "qwerty") {
     game.layout = "qwerty";
-    if (labelsVisible) {
+    if (game.labelsVisible) {
       labelElements.dvorak.forEach(function(node) {
         node.classList.add("hidden");
       });
@@ -105,7 +103,7 @@ function changeLayout(newLayout: string) {
     }
   } else {
     game.layout = "dvorak";
-    if (labelsVisible) {
+    if (game.labelsVisible) {
       labelElements.qwerty.forEach(function(node) {
         node.classList.add("hidden");
       });
@@ -119,8 +117,8 @@ function changeLayout(newLayout: string) {
 $("labelVisibilityCheckbox").addEventListener("change", toggleLabelVisibility);
 
 function toggleLabelVisibility() {
-  labelsVisible = !labelsVisible;
-  if (labelsVisible) {
+  game.labelsVisible = !game.labelsVisible;
+  if (game.labelsVisible) {
     if (game.layout === "dvorak") {
       labelElements.dvorak.forEach(function(node) {
         node.classList.remove("hidden");
@@ -228,7 +226,7 @@ function keyAnimate(key) {
   }
   var id = setInterval(animateStep, 19);
   function animateStep() {
-    if (lightness == 0) {
+    if (lightness === 0) {
       key.style = null;
       clearInterval(id);
     } else {
@@ -298,9 +296,9 @@ function hitKey(keyId: number, isFromPlayer: boolean) {
 }
 
 function checkMatchingNotes(keyId: number) {
-  if (game.secretSequence[game.playerSequenceIndex] != keyId) {
+  if (game.secretSequence[game.playerSequenceIndex] !== keyId) {
     gameOver();
-  } else if (game.playerSequenceIndex == game.secretSequence.length - 1) {
+  } else if (game.playerSequenceIndex === game.secretSequence.length - 1) {
     game.playerTurn = false;
     setTimeout(correctSequence, 233);
   } else {
