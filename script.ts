@@ -1,21 +1,32 @@
 "use strict";
 
-function $(id: string) {
-  return document.getElementById(id);
-}
-
+	//const heldDownKey = {
+	//	0: false,
+	//	1: false,
+	//	2: false,
+	//	3: false,
+	//	4: false,
+	//	5: false,
+	//	6: false,
+	//	7: false,
+	//	8: false,
+	//	9: false,
+	//	10: false,
+	//	11: false,
+	//	12: false,
+	//};
 const labelElements = {
-  qwerty: null,
-  dvorak: null
+	// fill after keyboard is generated
+  qwerty: [],
+  dvorak: [] 
 };
+const sounds = []
 
-const musicKey = [];
-
+const musicKeyElements = [];
 const chords = {
   win: [0, 4, 7, 12],
-  freePlay: [0, 11, 2, 9, 4, 7, 6, 5, 8, 3, 10, 1, 12]
+  //freePlay: [0, 11, 2, 9, 4, 7, 6, 5, 8, 3, 10, 1, 12]
 };
-
 const layoutMap = {
   dvorak: {
     a: 0,
@@ -64,7 +75,6 @@ const layoutMap = {
     b: 25 // replaySequence
   }
 };
-
 const game = {
   score: 0,
   secretSequence: [],
@@ -76,48 +86,68 @@ const game = {
   freePlay: true
 };
 
-$("newGameBtn").addEventListener("click", newGame);
-$("freePlayBtn").addEventListener("click", freePlay);
-$("replaySequenceBtn").addEventListener("click", replayComputerSequence);
-$("layoutSelector").addEventListener("change", function(event) {
-  changeLayout(event.target.value);
-});
-
-document.onkeypress = function(pressEvent) {
-  console.log(pressEvent.key);
-  console.log("keyboard input:", layoutMap[game.layout][pressEvent.key]);
-  keyPressInterpret(layoutMap[game.layout][pressEvent.key]);
-};
-
-function changeLayout(newLayout: string) {
-  console.log("switch keyboard to", newLayout);
-  if (newLayout === "qwerty") {
-    game.layout = "qwerty";
-    if (game.labelsVisible) {
-      labelElements.dvorak.forEach(function(node) {
-        node.classList.add("hidden");
-      });
-      labelElements.qwerty.forEach(function(node) {
-        node.classList.remove("hidden");
-      });
-    }
-  } else {
-    game.layout = "dvorak";
-    if (game.labelsVisible) {
-      labelElements.qwerty.forEach(function(node) {
-        node.classList.add("hidden");
-      });
-      labelElements.dvorak.forEach(function(node) {
-        node.classList.remove("hidden");
-      });
-    }
-  }
+function $(id: string) {
+  return document.getElementById(id);
 }
 
-$("labelVisibilityCheckbox").addEventListener("change", toggleLabelVisibility);
+function getKeyByValue(object, value) {
+  return Object.keys(object).find(key => object[key] === value);
+}
+
+function addEventListeners() {
+	$("labelVisibilityCheckbox").addEventListener("change", toggleLabelVisibility);
+	$("newGameBtn").addEventListener("click", newGame);
+	$("freePlayBtn").addEventListener("click", freePlay);
+	$("replaySequenceBtn").addEventListener("click", replayComputerSequence);
+	$("layoutSelector").addEventListener("change", function(event) {
+		changeLayout(event.target.value);
+	});
+	document.addEventListener('keydown', (pressEvent) => {
+		//console.log(pressEvent.key);
+		//console.log("keyboard pressed:", layoutMap[game.layout][pressEvent.key]);
+		//heldDownKey(layoutMap[game.layout][pressEvent.key]) = true
+		keyPressInterpret(layoutMap[game.layout][pressEvent.key]);
+	});
+	document.addEventListener('keyup', (pressEvent) => {
+		//console.log("keyboard released:", layoutMap[game.layout][pressEvent.key]);
+		//heldDownKey(layoutMap[game.layout][pressEvent.key]) = false
+	});
+}
+
+function changeLayout(newLayout: string) {
+	console.log("switch keyboard to", newLayout);
+	$("layoutSelector").value = newLayout;
+	if (newLayout === "qwerty") {
+		game.layout = "qwerty";
+		if (game.labelsVisible) {
+			showThisHideThat(labelElements.qwerty, labelElements.dvorak);
+		}
+	} else {
+		game.layout = "dvorak";
+		if (game.labelsVisible) {
+			showThisHideThat(labelElements.dvorak, labelElements.qwerty);
+		}
+	}
+}
+
+function showThisHideThat(showThis, hideThat) {
+	showThis.forEach(function(node) {
+		node.classList.remove("hidden");
+	});
+	hideThat.forEach(function(node) {
+		node.classList.add("hidden");
+	});
+}
 
 function toggleLabelVisibility() {
   game.labelsVisible = !game.labelsVisible;
+	$("labelVisibilityCheckbox").checked = game.labelsVisible
+	labelElements.dvorak.forEach(function(node) {
+		node.classList.add("hidden");
+	});
+	labelElements.qwerty.forEach(function(node) {
+		node.classList.add("hidden");
+	});
   if (game.labelsVisible) {
     if (game.layout === "dvorak") {
       labelElements.dvorak.forEach(function(node) {
@@ -128,54 +158,44 @@ function toggleLabelVisibility() {
         node.classList.remove("hidden");
       });
     }
-  } else {
-    labelElements.dvorak.forEach(function(node) {
-      node.classList.add("hidden");
-    });
-    labelElements.qwerty.forEach(function(node) {
-      node.classList.add("hidden");
-    });
   }
 }
 
-function getKeyByValue(object, value) {
-  return Object.keys(object).find(key => object[key] === value);
-}
-
-// create dom element for keyboard input => musical key
 function generateLabel(labeltext: string, labelGroup: string) {
-  var label = document.createElement("span");
+	// create DOM element for keyboard input => musical key
+  const label = document.createElement("span");
   label.classList.add("label", labelGroup, "hidden");
   label.textContent = labeltext;
   return label;
 }
 
-function generateKeyElement(rowElement: HTMLElement, info, id: number) {
-  var newDiv = document.createElement("div");
-  // grabs the keyboard input that triggers the given music key
-  var qwertyLabel = generateLabel(
+function generateKeyElement(info, id: number) {
+  const newDiv = document.createElement("div");
+  const qwertyLabel = generateLabel(
     getKeyByValue(layoutMap.qwerty, id),
     "qwerty"
   );
-  var dvorakLabel = generateLabel(
+	labelElements.qwerty.push(qwertyLabel);
+  const dvorakLabel = generateLabel(
     getKeyByValue(layoutMap.dvorak, id),
     "dvorak"
   );
+	labelElements.dvorak.push(dvorakLabel);
   newDiv.append(qwertyLabel, dvorakLabel);
   newDiv.classList.add("key-" + id, "key");
   newDiv.id = "key" + id;
-  rowElement.append(newDiv);
-  newDiv.addEventListener("click", function() {
+  newDiv.addEventListener("click", () => {
     console.log("manual input: ", id);
     keyPressInterpret(id);
   });
   newDiv.color = [info.hues[id], info.sat, info.light];
   newDiv.natural = info.natural;
-  musicKey[id] = newDiv;
+  musicKeyElements[id] = newDiv;
+	return newDiv;
 }
 
 function generateKeyboard() {
-  let blackInfo = {
+  const blackInfo = {
     ids: [1, 3, -1, 6, 8, 10],
     hues: {
       1: 205,
@@ -188,7 +208,7 @@ function generateKeyboard() {
     light: 29,
     natural: false
   };
-  let whiteInfo = {
+  const whiteInfo = {
     ids: [0, 2, 4, 5, 7, 9, 11, 12],
     hues: {
       0: 0,
@@ -205,39 +225,31 @@ function generateKeyboard() {
     natural: true
   };
 
-  blackInfo.ids.forEach(function(id) {
-    generateKeyElement($("blackRow"), blackInfo, id);
+  blackInfo.ids.forEach( (id) => {
+    const key = generateKeyElement(blackInfo, id);
+		$("blackRow").appendChild(key);
   });
 
-  whiteInfo.ids.forEach(function(id) {
-    generateKeyElement($("whiteRow"), whiteInfo, id);
+  whiteInfo.ids.forEach( (id) => {
+    const key = generateKeyElement(whiteInfo, id);
+		$("whiteRow").appendChild(key);
   });
-
-  labelElements.qwerty = document.querySelectorAll(".qwerty");
-  labelElements.dvorak = document.querySelectorAll(".dvorak");
 }
 
 function keyAnimate(key) {
-  var lightness = 14;
-  var lightStep = 1;
+  let lightness = 20.4;
+  let lightStep = 1.2;
   if (key.natural) {
-    lightness = 28;
-    lightStep = 2;
+    lightness = 40.8;
+    lightStep = 2.4;
   }
-  var id = setInterval(animateStep, 19);
+  const id = setInterval(animateStep, 19);
   function animateStep() {
-    if (lightness === 0) {
+    if (lightness <= 0) {
       key.style = null;
       clearInterval(id);
     } else {
-      key.style.background =
-        "hsl(" +
-        key.color[0] +
-        ", " +
-        key.color[1] +
-        "%, " +
-        (key.color[2] + lightness) +
-        "%)";
+      key.style.background = `hsl(${key.color[0]}, ${key.color[1]}%, ${key.color[2] + lightness}%)`;
       lightness -= lightStep;
     }
   }
@@ -253,25 +265,23 @@ function keyPressInterpret(idInput: number) {
       freePlay();
       break;
     case 22:
-      $("layoutSelector").value = "qwerty";
       changeLayout("qwerty");
       break;
     case 23:
-      $("layoutSelector").value = "dvorak";
       changeLayout("dvorak");
       break;
     case 24:
-      $("labelVisibilityCheckbox").checked = !$("labelVisibilityCheckbox")
-        .checked;
       toggleLabelVisibility();
       break;
     case 25:
-      replayComputerSequence();
+      if (game.playerTurn) {
+				replayComputerSequence();
+			}
       break;
     default:
       // music note inputs
       if (game.playerTurn) {
-        hitKey(idInput, true);
+        hitKey(idInput);
         if (!game.freePlay) {
           checkMatchingNotes(idInput);
         }
@@ -279,20 +289,18 @@ function keyPressInterpret(idInput: number) {
   }
 }
 
-function hitKey(keyId: number, isFromPlayer: boolean) {
-  if (game.playerTurn === isFromPlayer) {
-    keyAnimate(musicKey[keyId]);
-    var audioElement = document.createElement("audio");
-    var source = document.createElement("source");
-    audioElement.appendChild(source);
-    $("audioDiv").appendChild(audioElement);
-    source.src = `./audio/organ${keyId}.ogg`;
-    source.type = "audio/ogg";
-    audioElement.play();
-    setTimeout(() => {
-      audioElement.remove();
-    }, 1729);
-  }
+function generateSoundBank() {
+	for (let i = 0; i < 13; i++) {
+		const audioElement = new Howl({
+			src: [`./audio/organ${i}.ogg`]
+		});
+		sounds.push(audioElement);
+	}
+}
+
+function hitKey(keyId: number) {
+	keyAnimate(musicKeyElements[keyId]);
+	sounds[keyId].play();
 }
 
 function checkMatchingNotes(keyId: number) {
@@ -307,7 +315,7 @@ function checkMatchingNotes(keyId: number) {
 }
 
 function playChord(chord: number[], step: number, speed: number) {
-  hitKey(chord[step], false);
+  hitKey(chord[step]);
   step++;
   if (step < chord.length) {
     setTimeout(playChord, speed, chord, step, speed);
@@ -315,9 +323,9 @@ function playChord(chord: number[], step: number, speed: number) {
 }
 
 function computerPlaySequence(sequence: number[]) {
-  var sequenceCopy = sequence.slice();
-  console.log(sequenceCopy);
-  hitKey(sequenceCopy.shift(), false);
+  const sequenceCopy = sequence.slice();
+  //console.log(sequenceCopy);
+  hitKey(sequenceCopy.shift());
   if (sequenceCopy.length > 0) {
     setTimeout(computerPlaySequence, game.computerTempo, sequenceCopy);
   } else {
@@ -326,19 +334,21 @@ function computerPlaySequence(sequence: number[]) {
 }
 
 function replayComputerSequence() {
-  if (game.playerSequenceIndex === 0 && game.secretSequence[0] !== undefined) {
-    console.log(game.secretSequence);
-    console.log(game.playerSequenceIndex);
-    game.playerTurn = false;
-    $("container").className = "bg-computer-turn";
-    computerPlaySequence(game.secretSequence);
-  }
+  if (game.playerSequenceIndex !== 0 || 
+			game.secretSequence[0] === undefined) {
+		return;
+	}
+	//console.log(game.secretSequence);
+	//console.log(game.playerSequenceIndex);
+	game.playerTurn = false;
+	$("container").className = "bg-computer-turn";
+	computerPlaySequence(game.secretSequence);
 }
 
 function correctSequence() {
   game.playerTurn = false;
   $("container").className = "bg-computer-turn";
-  console.log("good job bud");
+  //console.log("good job bud");
   setTimeout(playChord, 233, chords.win, 0, 73);
   game.score++;
   $("scoreDiv").textContent = String(game.score);
@@ -373,11 +383,11 @@ function playerTurn() {
     $("container").className = "bg-player-turn";
     game.playerTurn = true;
   }, 377);
-  console.log("now's your turn");
+  //console.log("now's your turn");
 }
 
 function computerTurn() {
-  console.log("now's the computer's turn");
+  //console.log("now's the computer's turn");
   game.playerTurn = false;
   game.playerSequenceIndex = 0;
   // add new note to secretSequence
@@ -391,8 +401,8 @@ function gameOver() {
   game.secretSequence = [];
   console.log("you lose");
   // play that bad chord
-  var root = Math.floor(Math.random() * 13);
-  var badChord = [root];
+  const root = Math.floor(Math.random() * 13);
+  const badChord = [root];
   badChord.push((root + 6) % 13);
   badChord.push(Math.floor(Math.random() * 13));
   badChord.push((root + 1) % 13);
@@ -400,6 +410,11 @@ function gameOver() {
   playChord(badChord, 0, 73);
 }
 
-// game init
-generateKeyboard();
-freePlay();
+function main() {
+	addEventListeners();
+	generateKeyboard();
+	generateSoundBank();
+	freePlay();
+}
+
+main();

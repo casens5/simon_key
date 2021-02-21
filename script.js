@@ -1,17 +1,28 @@
 "use strict";
-// DOM elements
-function $(id) {
-    return document.getElementById(id);
-}
+//const heldDownKey = {
+//	0: false,
+//	1: false,
+//	2: false,
+//	3: false,
+//	4: false,
+//	5: false,
+//	6: false,
+//	7: false,
+//	8: false,
+//	9: false,
+//	10: false,
+//	11: false,
+//	12: false,
+//};
 var labelElements = {
-    qwerty: null,
-    dvorak: null
+    // fill after keyboard is generated
+    qwerty: [],
+    dvorak: []
 };
-var labelsVisible = false;
-var musicKey = [];
+var sounds = [];
+var musicKeyElements = [];
 var chords = {
-    win: [0, 4, 7, 12],
-    freePlay: [0, 11, 2, 9, 4, 7, 6, 5, 8, 3, 10, 1, 12]
+    win: [0, 4, 7, 12]
 };
 var layoutMap = {
     dvorak: {
@@ -71,46 +82,65 @@ var game = {
     playerSequenceIndex: 0,
     freePlay: true
 };
-$("newGameBtn").addEventListener("click", newGame);
-$("freePlayBtn").addEventListener("click", freePlay);
-$("replaySequenceBtn").addEventListener("click", replayComputerSequence);
-$("layoutSelector").addEventListener("change", function (event) {
-    changeLayout(event.target.value);
-});
-document.onkeypress = function (pressEvent) {
-    console.log(pressEvent.key);
-    console.log("keyboard input:", layoutMap[game.layout][pressEvent.key]);
-    keyPressInterpret(layoutMap[game.layout][pressEvent.key]);
-};
+function $(id) {
+    return document.getElementById(id);
+}
+function getKeyByValue(object, value) {
+    return Object.keys(object).find(function (key) { return object[key] === value; });
+}
+function addEventListeners() {
+    $("labelVisibilityCheckbox").addEventListener("change", toggleLabelVisibility);
+    $("newGameBtn").addEventListener("click", newGame);
+    $("freePlayBtn").addEventListener("click", freePlay);
+    $("replaySequenceBtn").addEventListener("click", replayComputerSequence);
+    $("layoutSelector").addEventListener("change", function (event) {
+        changeLayout(event.target.value);
+    });
+    document.addEventListener('keydown', function (pressEvent) {
+        //console.log(pressEvent.key);
+        //console.log("keyboard pressed:", layoutMap[game.layout][pressEvent.key]);
+        //heldDownKey(layoutMap[game.layout][pressEvent.key]) = true
+        keyPressInterpret(layoutMap[game.layout][pressEvent.key]);
+    });
+    document.addEventListener('keyup', function (pressEvent) {
+        //console.log("keyboard released:", layoutMap[game.layout][pressEvent.key]);
+        //heldDownKey(layoutMap[game.layout][pressEvent.key]) = false
+    });
+}
 function changeLayout(newLayout) {
     console.log("switch keyboard to", newLayout);
+    $("layoutSelector").value = newLayout;
     if (newLayout === "qwerty") {
         game.layout = "qwerty";
-        if (labelsVisible) {
-            labelElements.dvorak.forEach(function (node) {
-                node.classList.add("hidden");
-            });
-            labelElements.qwerty.forEach(function (node) {
-                node.classList.remove("hidden");
-            });
+        if (game.labelsVisible) {
+            showThisHideThat(labelElements.qwerty, labelElements.dvorak);
         }
     }
     else {
         game.layout = "dvorak";
-        if (labelsVisible) {
-            labelElements.qwerty.forEach(function (node) {
-                node.classList.add("hidden");
-            });
-            labelElements.dvorak.forEach(function (node) {
-                node.classList.remove("hidden");
-            });
+        if (game.labelsVisible) {
+            showThisHideThat(labelElements.dvorak, labelElements.qwerty);
         }
     }
 }
-$("labelVisibilityCheckbox").addEventListener("change", toggleLabelVisibility);
+function showThisHideThat(showThis, hideThat) {
+    showThis.forEach(function (node) {
+        node.classList.remove("hidden");
+    });
+    hideThat.forEach(function (node) {
+        node.classList.add("hidden");
+    });
+}
 function toggleLabelVisibility() {
-    labelsVisible = !labelsVisible;
-    if (labelsVisible) {
+    game.labelsVisible = !game.labelsVisible;
+    $("labelVisibilityCheckbox").checked = game.labelsVisible;
+    labelElements.dvorak.forEach(function (node) {
+        node.classList.add("hidden");
+    });
+    labelElements.qwerty.forEach(function (node) {
+        node.classList.add("hidden");
+    });
+    if (game.labelsVisible) {
         if (game.layout === "dvorak") {
             labelElements.dvorak.forEach(function (node) {
                 node.classList.remove("hidden");
@@ -122,41 +152,31 @@ function toggleLabelVisibility() {
             });
         }
     }
-    else {
-        labelElements.dvorak.forEach(function (node) {
-            node.classList.add("hidden");
-        });
-        labelElements.qwerty.forEach(function (node) {
-            node.classList.add("hidden");
-        });
-    }
 }
-function getKeyByValue(object, value) {
-    return Object.keys(object).find(function (key) { return object[key] === value; });
-}
-// create dom element for keyboard input => musical key
 function generateLabel(labeltext, labelGroup) {
+    // create DOM element for keyboard input => musical key
     var label = document.createElement("span");
     label.classList.add("label", labelGroup, "hidden");
     label.textContent = labeltext;
     return label;
 }
-function generateKeyElement(rowElement, info, id) {
+function generateKeyElement(info, id) {
     var newDiv = document.createElement("div");
-    // grabs the keyboard input that triggers the given music key
     var qwertyLabel = generateLabel(getKeyByValue(layoutMap.qwerty, id), "qwerty");
+    labelElements.qwerty.push(qwertyLabel);
     var dvorakLabel = generateLabel(getKeyByValue(layoutMap.dvorak, id), "dvorak");
+    labelElements.dvorak.push(dvorakLabel);
     newDiv.append(qwertyLabel, dvorakLabel);
     newDiv.classList.add("key-" + id, "key");
     newDiv.id = "key" + id;
-    rowElement.append(newDiv);
     newDiv.addEventListener("click", function () {
         console.log("manual input: ", id);
         keyPressInterpret(id);
     });
     newDiv.color = [info.hues[id], info.sat, info.light];
     newDiv.natural = info.natural;
-    musicKey[id] = newDiv;
+    musicKeyElements[id] = newDiv;
+    return newDiv;
 }
 function generateKeyboard() {
     var blackInfo = {
@@ -189,36 +209,29 @@ function generateKeyboard() {
         natural: true
     };
     blackInfo.ids.forEach(function (id) {
-        generateKeyElement($("blackRow"), blackInfo, id);
+        var key = generateKeyElement(blackInfo, id);
+        $("blackRow").appendChild(key);
     });
     whiteInfo.ids.forEach(function (id) {
-        generateKeyElement($("whiteRow"), whiteInfo, id);
+        var key = generateKeyElement(whiteInfo, id);
+        $("whiteRow").appendChild(key);
     });
-    labelElements.qwerty = document.querySelectorAll(".qwerty");
-    labelElements.dvorak = document.querySelectorAll(".dvorak");
 }
 function keyAnimate(key) {
-    var lightness = 14;
-    var lightStep = 1;
+    var lightness = 20.4;
+    var lightStep = 1.2;
     if (key.natural) {
-        lightness = 28;
-        lightStep = 2;
+        lightness = 40.8;
+        lightStep = 2.4;
     }
     var id = setInterval(animateStep, 19);
     function animateStep() {
-        if (lightness === 0) {
+        if (lightness <= 0) {
             key.style = null;
             clearInterval(id);
         }
         else {
-            key.style.background =
-                "hsl(" +
-                    key.color[0] +
-                    ", " +
-                    key.color[1] +
-                    "%, " +
-                    (key.color[2] + lightness) +
-                    "%)";
+            key.style.background = "hsl(" + key.color[0] + ", " + key.color[1] + "%, " + (key.color[2] + lightness) + "%)";
             lightness -= lightStep;
         }
     }
@@ -233,45 +246,40 @@ function keyPressInterpret(idInput) {
             freePlay();
             break;
         case 22:
-            $("layoutSelector").value = "qwerty";
             changeLayout("qwerty");
             break;
         case 23:
-            $("layoutSelector").value = "dvorak";
             changeLayout("dvorak");
             break;
         case 24:
-            $("labelVisibilityCheckbox").checked = !$("labelVisibilityCheckbox")
-                .checked;
             toggleLabelVisibility();
             break;
         case 25:
-            replayComputerSequence();
+            if (game.playerTurn) {
+                replayComputerSequence();
+            }
             break;
         default:
             // music note inputs
             if (game.playerTurn) {
-                hitKey(idInput, true);
+                hitKey(idInput);
                 if (!game.freePlay) {
                     checkMatchingNotes(idInput);
                 }
             }
     }
 }
-function hitKey(keyId, isFromPlayer) {
-    if (game.playerTurn === isFromPlayer) {
-        keyAnimate(musicKey[keyId]);
-        var audioElement = document.createElement("audio");
-        var source = document.createElement("source");
-        audioElement.appendChild(source);
-        $("audioDiv").appendChild(audioElement);
-        source.src = "./audio/organ" + keyId + ".ogg";
-        source.type = "audio/ogg";
-        audioElement.play();
-        setTimeout(function () {
-            audioElement.remove();
-        }, 1729);
+function generateSoundBank() {
+    for (var i = 0; i < 13; i++) {
+        var audioElement = new Howl({
+            src: ["./audio/organ" + i + ".ogg"]
+        });
+        sounds.push(audioElement);
     }
+}
+function hitKey(keyId) {
+    keyAnimate(musicKeyElements[keyId]);
+    sounds[keyId].play();
 }
 function checkMatchingNotes(keyId) {
     if (game.secretSequence[game.playerSequenceIndex] !== keyId) {
@@ -286,7 +294,7 @@ function checkMatchingNotes(keyId) {
     }
 }
 function playChord(chord, step, speed) {
-    hitKey(chord[step], false);
+    hitKey(chord[step]);
     step++;
     if (step < chord.length) {
         setTimeout(playChord, speed, chord, step, speed);
@@ -294,8 +302,8 @@ function playChord(chord, step, speed) {
 }
 function computerPlaySequence(sequence) {
     var sequenceCopy = sequence.slice();
-    console.log(sequenceCopy);
-    hitKey(sequenceCopy.shift(), false);
+    //console.log(sequenceCopy);
+    hitKey(sequenceCopy.shift());
     if (sequenceCopy.length > 0) {
         setTimeout(computerPlaySequence, game.computerTempo, sequenceCopy);
     }
@@ -304,18 +312,20 @@ function computerPlaySequence(sequence) {
     }
 }
 function replayComputerSequence() {
-    if (game.playerSequenceIndex === 0 && game.secretSequence[0] !== undefined) {
-        console.log(game.secretSequence);
-        console.log(game.playerSequenceIndex);
-        game.playerTurn = false;
-        $("container").className = "bg-computer-turn";
-        computerPlaySequence(game.secretSequence);
+    if (game.playerSequenceIndex !== 0 ||
+        game.secretSequence[0] === undefined) {
+        return;
     }
+    //console.log(game.secretSequence);
+    //console.log(game.playerSequenceIndex);
+    game.playerTurn = false;
+    $("container").className = "bg-computer-turn";
+    computerPlaySequence(game.secretSequence);
 }
 function correctSequence() {
     game.playerTurn = false;
     $("container").className = "bg-computer-turn";
-    console.log("good job bud");
+    //console.log("good job bud");
     setTimeout(playChord, 233, chords.win, 0, 73);
     game.score++;
     $("scoreDiv").textContent = String(game.score);
@@ -347,10 +357,10 @@ function playerTurn() {
         $("container").className = "bg-player-turn";
         game.playerTurn = true;
     }, 377);
-    console.log("now's your turn");
+    //console.log("now's your turn");
 }
 function computerTurn() {
-    console.log("now's the computer's turn");
+    //console.log("now's the computer's turn");
     game.playerTurn = false;
     game.playerSequenceIndex = 0;
     // add new note to secretSequence
@@ -371,6 +381,10 @@ function gameOver() {
     badChord.push((root + 7) % 13);
     playChord(badChord, 0, 73);
 }
-// game init
-generateKeyboard();
-freePlay();
+function main() {
+    addEventListeners();
+    generateKeyboard();
+    generateSoundBank();
+    freePlay();
+}
+main();
