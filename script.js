@@ -1,19 +1,24 @@
 "use strict";
-//const heldDownKey = {
-//	0: false,
-//	1: false,
-//	2: false,
-//	3: false,
-//	4: false,
-//	5: false,
-//	6: false,
-//	7: false,
-//	8: false,
-//	9: false,
-//	10: false,
-//	11: false,
-//	12: false,
-//};
+var heldDownKey = {
+    0: false,
+    1: false,
+    2: false,
+    3: false,
+    4: false,
+    5: false,
+    6: false,
+    7: false,
+    8: false,
+    9: false,
+    10: false,
+    11: false,
+    12: false,
+    20: false,
+    21: false,
+    22: false,
+    24: false,
+    25: false
+};
 var labelElements = {
     // fill after keyboard is generated
     qwerty: [],
@@ -99,12 +104,12 @@ function addEventListeners() {
     document.addEventListener('keydown', function (pressEvent) {
         //console.log(pressEvent.key);
         //console.log("keyboard pressed:", layoutMap[game.layout][pressEvent.key]);
-        //heldDownKey(layoutMap[game.layout][pressEvent.key]) = true
         keyPressInterpret(layoutMap[game.layout][pressEvent.key]);
+        heldDownKey[layoutMap[game.layout][pressEvent.key]] = true;
     });
     document.addEventListener('keyup', function (pressEvent) {
         //console.log("keyboard released:", layoutMap[game.layout][pressEvent.key]);
-        //heldDownKey(layoutMap[game.layout][pressEvent.key]) = false
+        heldDownKey[layoutMap[game.layout][pressEvent.key]] = false;
     });
 }
 function changeLayout(newLayout) {
@@ -237,6 +242,9 @@ function keyAnimate(key) {
     }
 }
 function keyPressInterpret(idInput) {
+    if (heldDownKey[idInput]) {
+        return;
+    }
     switch (idInput) {
         //keyboard inputs
         case 20:
