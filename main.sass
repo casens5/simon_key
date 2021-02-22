@@ -8,9 +8,6 @@ html, body
   height: 100%
   min-height: 100%
 
-.hidden
-  display: none
-
 .bg-game-over
   background: hsl(0, 39, 16)
 
@@ -32,104 +29,61 @@ html, body
 
 #container
   display: flex
+  flex-direction: column
   width: 100%
-  min-height: 100%
+  height: 100%
 
-.music-keyboard
-  position: absolute
-  height: 62%
-  display: grid
-  left: 50%
-  top: 45%
-  transform: translate(-50%, -50%)
-  grid-template-rows: 1fr 1fr
-  justify-content: center
-  width: 1066px
-
-.key
+#keyboardContainer
+  width: 100%
+  height: 100%
   display: flex
   justify-content: center
-  align-items: end
-  height: 300px
-  width: 60px
-  margin: 11px
+  align-items: center
+
+.music-keyboard
+  display: grid
+  grid-template-rows: 1fr 2fr
+  height: 100%
+  width: 100%
+  max-width: 640px
+  max-height: 480px
+
+.key
+  margin: 1.4%
   border-radius: 13px
+  width: 100%
 
 .label
   font-size: 41px
   margin-bottom: 23px
-  text-shadow: 0 0 6px #000, 0 0 2px #000, 0 0 4px #000, 0 0 9px #0003
+  text-shadow: 0 0 6px #000 
 
 .pressed
   box-shadow: 0 0 11px 11px
 
-.white-row
-  display: grid
-  grid-template-columns: repeat(8, 1fr)
+.music-key-row
+  display: flex
 
-.black-row
-  display: grid
-  grid-template-columns: repeat(8, 1fr)
-  height: 200px
+#blackRow
+  z-index: 1
   position: relative
-  top: 120px
-  left: 41px
+  left: 6.4%
+  height: 200%
 
-// white row
-.key-0
-  background: hsl(0, 27%, 59%)
-  border-color: hsl(0, 27%, 59%)
+.hidden-key
+  height: 0
 
-.key-2
-  background: hsl(51, 27%, 59%)
-  border-color: hsl(51, 27%, 59%)
+#key-1
+  opacity: 0
 
-.key-4
-  background: hsl(103, 27%, 59%)
-  border-color: hsl(103, 27%, 59%)
+.hidden
+  display: none
 
-.key-5
-  background: hsl(154, 27%, 59%)
-  border-color: hsl(154, 27%, 59%)
 
-.key-7
-  background: hsl(206, 27%, 59%)
-  border-color: hsl(206, 27%, 59%)
 
-.key-9
-  background: hsl(257, 27%, 59%)
-  border-color: hsl(257, 27%, 59%)
 
-.key-11
-  background: hsl(308, 27%, 59%)
-  border-color: hsl(308, 27%, 59%)
 
-.key-12
-  background: hsl(0, 27%, 59%)
-  border-color: hsl(0, 27%, 59%)
 
-// black row
-.key-1
-  background: hsl(205, 55%, 29%)
-  // background: hsl(202, 55%, 29%)
-  border-color: hsl(200, 55%, 29%)
 
-.key-3
-  background: hsl(257, 55%, 29%)
-  // background: hsl(274, 55%, 29%)
-  border-color: hsl(272, 55%, 29%)
 
-.key-6
-  background: hsl(0, 55%, 29%)
-  // background: hsl(346, 55%, 29%)
-  border-color: hsl(344, 55%, 29%)
 
-.key-8
-  background: hsl(52, 55%, 29%)
-  // background: hsl(58, 55%, 29%)
-  border-color: hsl(56, 55%, 29%)
-
-.key-10
-  background: hsl(103, 55%, 29%)
-  // background: hsl(130, 55%, 29%)
-  border-color: hsl(128, 55%, 29%)

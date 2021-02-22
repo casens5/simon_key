@@ -26,7 +26,6 @@ const labelElements = {
   dvorak: [] 
 };
 const sounds = []
-
 const musicKeyElements = [];
 const chords = {
   win: [0, 4, 7, 12],
@@ -90,6 +89,7 @@ const game = {
   playerSequenceIndex: 0,
   freePlay: true
 };
+const svgNameSpace = 'http://www.w3.org/2000/svg';
 
 function $(id: string) {
   return document.getElementById(id);
@@ -175,7 +175,15 @@ function generateLabel(labeltext: string, labelGroup: string) {
 }
 
 function generateKeyElement(info, id: number) {
-  const newDiv = document.createElement("div");
+	const svg = document.createElementNS(svgNameSpace, 'svg');
+	svg.setAttribute('version', '1.1');
+	svg.setAttribute('baseProfile', 'full');
+	svg.setAttribute('viewBox', '0 0 100 100');
+	svg.setAttribute('preserveAspectRatio', "none");
+	const color = [info.hues[id], info.sat, info.light];
+	const svgBg = drawRect(color);
+	svg.appendChild(svgBg);
+
   const qwertyLabel = generateLabel(
     getKeyByValue(layoutMap.qwerty, id),
     "qwerty"
@@ -186,17 +194,25 @@ function generateKeyElement(info, id: number) {
     "dvorak"
   );
 	labelElements.dvorak.push(dvorakLabel);
-  newDiv.append(qwertyLabel, dvorakLabel);
-  newDiv.classList.add("key-" + id, "key");
-  newDiv.id = "key" + id;
-  newDiv.addEventListener("click", () => {
-    console.log("manual input: ", id);
-    keyPressInterpret(id);
-  });
-  newDiv.color = [info.hues[id], info.sat, info.light];
-  newDiv.natural = info.natural;
-  musicKeyElements[id] = newDiv;
-	return newDiv;
+  svg.append(qwertyLabel, dvorakLabel);
+
+  svg.id = "key" + id;
+  svg.classList.add("key");
+  svg.color = color
+  svg.natural = info.natural;
+  musicKeyElements[id] = svg;
+	return svg;
+}
+
+function drawRect(inputColor) {
+	const rect = document.createElementNS(svgNameSpace, 'rect');
+	const color = `hsl(${inputColor[0]}, ${inputColor[1]}%, ${inputColor[2]}%)`;
+	rect.setAttribute('x', '0');
+	rect.setAttribute('y', '0');
+	rect.setAttribute('width', '100');
+	rect.setAttribute('height', '100');
+	rect.setAttribute('fill', color);
+	return rect;
 }
 
 function generateKeyboard() {
@@ -232,11 +248,26 @@ function generateKeyboard() {
 
   blackInfo.ids.forEach( (id) => {
     const key = generateKeyElement(blackInfo, id);
+		key.addEventListener("click", () => {
+			//console.log("manual input: ", id);
+			keyPressInterpret(id);
+		});
+		key.classList.add('black-key');
 		$("blackRow").appendChild(key);
   });
 
+	$('key-1').classList.add('hidden-key');
+	const keyCopy1 = $('key-1').cloneNode();
+	const keyCopy2 = $('key-1').cloneNode();
+	$("blackRow").appendChild(keyCopy1);
+	$("blackRow").appendChild(keyCopy2);
+
   whiteInfo.ids.forEach( (id) => {
     const key = generateKeyElement(whiteInfo, id);
+		key.addEventListener("click", () => {
+			//console.log("manual input: ", id);
+			keyPressInterpret(id);
+		});
 		$("whiteRow").appendChild(key);
   });
 }

@@ -11,7 +11,6 @@
   </head>
   <body>
     <div id="container" class="container">
-      <div id="audioDiv" class="hidden"></div>
       <div id="userSettings" class="user-settings">
         <select id="layoutSelector" class="input" name="keyboard">
           <option value="qwerty">qwerty</option>
@@ -25,10 +24,12 @@
         <input type="checkbox" id="labelVisibilityCheckbox"/>
         <label for="labelVisibilityCheckbox">show keyboard layout</label>
       </div>
-      <div id="musicKeyboard" class="music-keyboard">
-        <div id="blackRow" class="black-row"></div>
-        <div id="whiteRow" class="white-row"></div>
-      </div>
+			<div id="keyboardContainer">
+				<div id="musicKeyboard" class="music-keyboard">
+					<div id="blackRow" class="music-key-row"></div>
+					<div id="whiteRow" class="music-key-row"></div>
+				</div>
+			</div>
     </div>
   </body>
 	<script src="script.js" defer></script>

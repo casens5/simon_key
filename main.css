@@ -10,10 +10,6 @@ html, body {
   min-height: 100%;
 }
 
-.hidden {
-  display: none;
-}
-
 .bg-game-over {
   background: #391919;
 }
@@ -40,119 +36,65 @@ html, body {
 
 #container {
   display: flex;
+  flex-direction: column;
   width: 100%;
-  min-height: 100%;
+  height: 100%;
+}
+
+#keyboardContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .music-keyboard {
-  position: absolute;
-  height: 62%;
   display: grid;
-  left: 50%;
-  top: 45%;
-  transform: translate(-50%, -50%);
-  grid-template-rows: 1fr 1fr;
-  justify-content: center;
-  width: 1066px;
+  grid-template-rows: 1fr 2fr;
+  height: 100%;
+  width: 100%;
+  max-width: 640px;
+  max-height: 480px;
 }
 
 .key {
-  display: flex;
-  justify-content: center;
-  align-items: end;
-  height: 300px;
-  width: 60px;
-  margin: 11px;
+  margin: 1.4%;
   border-radius: 13px;
+  width: 100%;
 }
 
 .label {
   font-size: 41px;
   margin-bottom: 23px;
-  text-shadow: 0 0 6px #000, 0 0 2px #000, 0 0 4px #000, 0 0 9px #0003;
+  text-shadow: 0 0 6px #000;
 }
 
 .pressed {
   box-shadow: 0 0 11px 11px;
 }
 
-.white-row {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
+.music-key-row {
+  display: flex;
 }
 
-.black-row {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  height: 200px;
+#blackRow {
+  z-index: 1;
   position: relative;
-  top: 120px;
-  left: 41px;
+  left: 6.4%;
+  height: 200%;
 }
 
-.key-0 {
-  background: #b37a7a;
-  border-color: #b37a7a;
+.hidden-key {
+  height: 0;
 }
 
-.key-2 {
-  background: #b3aa7a;
-  border-color: #b3aa7a;
+#key-1 {
+  opacity: 0;
 }
 
-.key-4 {
-  background: #8ab37a;
-  border-color: #8ab37a;
-}
-
-.key-5 {
-  background: #7ab39a;
-  border-color: #7ab39a;
-}
-
-.key-7 {
-  background: #7a9ab3;
-  border-color: #7a9ab3;
-}
-
-.key-9 {
-  background: #8a7ab3;
-  border-color: #8a7ab3;
-}
-
-.key-11 {
-  background: #b37aab;
-  border-color: #b37aab;
-}
-
-.key-12 {
-  background: #b37a7a;
-  border-color: #b37a7a;
-}
-
-.key-1 {
-  background: #215173;
-  border-color: #215873;
-}
-
-.key-3 {
-  background: #382173;
-  border-color: #4d2173;
-}
-
-.key-6 {
-  background: #732121;
-  border-color: #732137;
-}
-
-.key-8 {
-  background: #736821;
-  border-color: #736d21;
-}
-
-.key-10 {
-  background: #387321;
-  border-color: #21732c;
+.hidden {
+  display: none;
 }
 
 /*# sourceMappingURL=main.css.map */
