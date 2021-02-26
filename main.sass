@@ -26,6 +26,7 @@ html, body
   border-radius: 6px
   padding: 4px
   border: 3px outset #641b82
+  margin-right: 0.25em
 
 #container
   display: flex
@@ -42,7 +43,7 @@ html, body
 
 .music-keyboard
   display: grid
-  grid-template-rows: 1fr 2fr
+  grid-template-rows: 160px 320px
   height: 100%
   width: 100%
   max-width: 640px
@@ -53,10 +54,21 @@ html, body
   border-radius: 13px
   width: 100%
 
+.key-animate
+  animation-duration: 1s
+  animation-name: keyAnimate
+  animation-iteration-count: 1
+  animation-timing-function: easeOutQuad
+
 .label
   font-size: 41px
+  fill: #facade
+  font-family: 'Fantasque Sans Mono', monospace
   margin-bottom: 23px
-  text-shadow: 0 0 6px #000 
+  text-shadow: 0 0 2px #000, 0 0 8px #000, 0 0 13px #000
+
+.label-bg
+  fill: #0004
 
 .pressed
   box-shadow: 0 0 11px 11px
@@ -72,12 +84,64 @@ html, body
 
 .hidden-key
   height: 0
-
-#key-1
   opacity: 0
+
 
 .hidden
   display: none
+
+.user-settings
+  display: flex
+  align-items: center
+  margin: 0em
+
+.expand
+  width: 50%
+  max-width: 50%
+
+.align-right
+  display: flex
+  justify-content: flex-end
+  align-items: center
+
+#keyboardSettings
+  display: none
+
+#gameControls
+  width: 100%
+  max-width: 100%
+
+#scoreDisplay
+  margin-right: 3em
+  font-size: 24px
+
+@media (min-width: 850px) and (min-height: 600px)
+  .user-settings
+    margin: 1em
+
+  .input
+    margin-right: 1em
+
+  #keyboardSettings
+    display: flex
+
+  #gameControls
+    width: 50%
+    max-width: 50%
+
+  #scoreDisplay
+    margin-right: 0px
+
+  #labelVizLabel
+    margin-left: 0.6em
+
+@keyframes keyAnimate
+  from
+    opacity: 1
+
+  to
+    opacity: 0
+
 
 
 

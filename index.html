@@ -6,23 +6,29 @@
 		<script
 			src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.1/howler.core.min.js">
 		</script>
-    <link rel="stylesheet" href="main.css" />
+		<link href="http://fonts.cdnfonts.com/css/fantasque-sans-mono" rel="stylesheet">
+		<link rel="stylesheet" href="main.css" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body>
     <div id="container" class="container">
       <div id="userSettings" class="user-settings">
-        <select id="layoutSelector" class="input" name="keyboard">
-          <option value="qwerty">qwerty</option>
-          <option value="dvorak">dvorak</option>
-        </select>
-        <button id="newGameBtn" class="input button">new game</button>
-        <button id="freePlayBtn" class="input button">free play</button>
-        <br />
-        <span id="scoreDiv"></span>
-        <button id="replaySequenceBtn" class="input button">replay</button>
-        <input type="checkbox" id="labelVisibilityCheckbox"/>
-        <label for="labelVisibilityCheckbox">show keyboard layout</label>
+				<div id="gameControls" class="expand">
+					<button id="newGameBtn" class="input button">new game</button>
+					<button id="freePlayBtn" class="input button">free play</button>
+					<button id="replaySequenceBtn" class="input button">replay last sequence</button>
+				</div>
+				<div>
+					<span id="scoreDisplay"></span>
+				</div>
+				<div id="keyboardSettings" class="expand align-right">
+					<select id="layoutSelector" class="input" name="keyboard">
+						<option value="qwerty">qwerty</option>
+						<option value="dvorak">dvorak</option>
+					</select>
+					<input type="checkbox" id="labelVisibilityCheckbox"/>
+					<label id="labelVizLabel" for="labelVisibilityCheckbox">show keyboard layout</label>
+				</div>
       </div>
 			<div id="keyboardContainer">
 				<div id="musicKeyboard" class="music-keyboard">

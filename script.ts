@@ -147,6 +147,12 @@ function showThisHideThat(showThis, hideThat) {
 function toggleLabelVisibility() {
   game.labelsVisible = !game.labelsVisible;
 	$("labelVisibilityCheckbox").checked = game.labelsVisible
+	document.querySelectorAll('.label-bg').forEach(bg => {
+		bg.classList.add('hidden');
+		if (game.labelsVisible) {
+			bg.classList.remove('hidden');
+		}
+	});
 	labelElements.dvorak.forEach(function(node) {
 		node.classList.add("hidden");
 	});
@@ -166,35 +172,45 @@ function toggleLabelVisibility() {
   }
 }
 
-function generateLabel(labeltext: string, labelGroup: string) {
-	// create DOM element for keyboard input => musical key
-  const label = document.createElement("span");
-  label.classList.add("label", labelGroup, "hidden");
-  label.textContent = labeltext;
-  return label;
-}
-
 function generateKeyElement(info, id: number) {
 	const svg = document.createElementNS(svgNameSpace, 'svg');
 	svg.setAttribute('version', '1.1');
 	svg.setAttribute('baseProfile', 'full');
-	svg.setAttribute('viewBox', '0 0 100 100');
+	svg.setAttribute('viewBox', '0 0 62 302');
 	svg.setAttribute('preserveAspectRatio', "none");
+	//const defs = document.createElementNS(svgNameSpace, 'defs');
+	//const blur = document.createElementNS(svgNameSpace, 'feGaussianBlur');
+	//blur.setAttribute('in', 'SourceAlpha');
+	//blur.setAttribute('stdDeviation', '4');
+	//blur.setAttribute('result', 'blur');
+	//defs.append(blur);
 	const color = [info.hues[id], info.sat, info.light];
-	const svgBg = drawRect(color);
-	svg.appendChild(svgBg);
+	const svgBg = drawRect(62, 302, color);
+	svgBg.setAttribute('transform', `translate(${62/2},${302/2})`);
+	const animateRect = svgBg.cloneNode();
+	animateRect.classList.add('key-animate-layer');
+	animateRect.setAttribute('fill', `hsl(${color[0]}, ${color[1]}%, ${color[2] + 35}%)`);
+	animateRect.setAttribute('opacity', '0');
+	svg.append(svgBg, animateRect);
 
-  const qwertyLabel = generateLabel(
+  const qwertyLabel = addText(
     getKeyByValue(layoutMap.qwerty, id),
     "qwerty"
   );
 	labelElements.qwerty.push(qwertyLabel);
-  const dvorakLabel = generateLabel(
+  const dvorakLabel = addText(
     getKeyByValue(layoutMap.dvorak, id),
     "dvorak"
   );
 	labelElements.dvorak.push(dvorakLabel);
-  svg.append(qwertyLabel, dvorakLabel);
+	const labelBg = drawRect(40, 60, [0, 0, 0]);
+	labelBg.setAttribute('transform', 'translate(31, 259)');
+	labelBg.setAttribute('rx', '13');
+	labelBg.setAttribute('ry', '13');
+	//labelBg.setAttribute('filter', 'blur');
+	labelBg.classList.add('label-bg', 'hidden');
+
+  svg.append(qwertyLabel, dvorakLabel, labelBg);
 
   svg.id = "key" + id;
   svg.classList.add("key");
@@ -204,15 +220,24 @@ function generateKeyElement(info, id: number) {
 	return svg;
 }
 
-function drawRect(inputColor) {
+function drawRect(width, height, inputColor) {
 	const rect = document.createElementNS(svgNameSpace, 'rect');
 	const color = `hsl(${inputColor[0]}, ${inputColor[1]}%, ${inputColor[2]}%)`;
-	rect.setAttribute('x', '0');
-	rect.setAttribute('y', '0');
-	rect.setAttribute('width', '100');
-	rect.setAttribute('height', '100');
+	rect.setAttribute('x', `-${width / 2}`);
+	rect.setAttribute('y', `-${height / 2}`);
+	rect.setAttribute('width', width);
+	rect.setAttribute('height', height);
 	rect.setAttribute('fill', color);
 	return rect;
+}
+
+function addText(text, labelgroup) {
+	const textElement = document.createElementNS(svgNameSpace, 'text');
+	textElement.setAttribute('x', '21');
+	textElement.setAttribute('y', '270');
+	textElement.textContent = text;
+	textElement.classList.add('label', 'hidden', labelgroup);
+	return textElement;
 }
 
 function generateKeyboard() {
@@ -273,22 +298,11 @@ function generateKeyboard() {
 }
 
 function keyAnimate(key) {
-  let lightness = 20.4;
-  let lightStep = 1.2;
-  if (key.natural) {
-    lightness = 40.8;
-    lightStep = 2.4;
-  }
-  const id = setInterval(animateStep, 19);
-  function animateStep() {
-    if (lightness <= 0) {
-      key.style = null;
-      clearInterval(id);
-    } else {
-      key.style.background = `hsl(${key.color[0]}, ${key.color[1]}%, ${key.color[2] + lightness}%)`;
-      lightness -= lightStep;
-    }
-  }
+	const keyAnimate = key.querySelector('.key-animate-layer')
+	keyAnimate.classList.remove('key-animate');
+    setTimeout(() => {
+			keyAnimate.classList.add('key-animate');
+		}, 23);
 }
 
 function keyPressInterpret(idInput: number) {
@@ -390,7 +404,7 @@ function correctSequence() {
   //console.log("good job bud");
   setTimeout(playChord, 233, chords.win, 0, 73);
   game.score++;
-  $("scoreDiv").textContent = String(game.score);
+  $("scoreDisplay").textContent = String(game.score);
   setTimeout(computerTurn, 1849);
 }
 
@@ -402,7 +416,7 @@ function freePlay() {
   game.playerTurn = true;
   game.freePlay = true;
   game.score = null;
-  $("scoreDiv").textContent = null;
+  $("scoreDisplay").textContent = null;
 }
 
 function newGame() {
@@ -413,7 +427,7 @@ function newGame() {
   game.secretSequence = [];
   game.playerSequenceIndex = 0;
   game.score = 0;
-  $("scoreDiv").textContent = String(game.score);
+  $("scoreDisplay").textContent = String(game.score);
   setTimeout(computerTurn, 987);
 }
 
