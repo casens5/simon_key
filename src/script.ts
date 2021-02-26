@@ -232,7 +232,7 @@ function drawRect(width, height, inputColor) {
 }
 
 function addText(text, labelgroup) {
-	const textElement = document.createElementNS(svgNameSpace, 'text');
+	const textElement: text = document.createElementNS(svgNameSpace, 'text');
 	textElement.setAttribute('x', '21');
 	textElement.setAttribute('y', '270');
 	textElement.textContent = text;

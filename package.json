@@ -1,0 +1,22 @@
+{
+  "name": "simon_key",
+  "version": "1.0.0",
+  "description": "plays a memory game with visual and musical feedback",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+		"sass": "sass --watch src/main.sass public/main.css"
+  },
+  "keywords": [],
+  "author": "ludant",
+  "license": "GPL"
+}
+
+
+
+
+
+
+
+
+
