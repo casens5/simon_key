@@ -1,5 +1,5 @@
 "use strict";
-var heldDownKey = {
+const heldDownKey = {
     0: false,
     1: false,
     2: false,
@@ -19,17 +19,17 @@ var heldDownKey = {
     24: false,
     25: false
 };
-var labelElements = {
+const labelElements = {
     // fill after keyboard is generated
     qwerty: [],
     dvorak: []
 };
-var sounds = [];
-var musicKeyElements = [];
-var chords = {
-    win: [0, 4, 7, 12]
+const sounds = [];
+const musicKeyElements = [];
+const chords = {
+    win: [0, 4, 7, 12],
 };
-var layoutMap = {
+const layoutMap = {
     dvorak: {
         a: 0,
         ",": 1,
@@ -77,7 +77,7 @@ var layoutMap = {
         b: 25 // replaySequence
     }
 };
-var game = {
+const game = {
     score: 0,
     secretSequence: [],
     labelsVisible: false,
@@ -87,12 +87,12 @@ var game = {
     playerSequenceIndex: 0,
     freePlay: true
 };
-var svgNameSpace = 'http://www.w3.org/2000/svg';
+const svgNameSpace = 'http://www.w3.org/2000/svg';
 function $(id) {
     return document.getElementById(id);
 }
 function getKeyByValue(object, value) {
-    return Object.keys(object).find(function (key) { return object[key] === value; });
+    return Object.keys(object).find(key => object[key] === value);
 }
 function addEventListeners() {
     $("labelVisibilityCheckbox").addEventListener("change", toggleLabelVisibility);
@@ -102,13 +102,13 @@ function addEventListeners() {
     $("layoutSelector").addEventListener("change", function (event) {
         changeLayout(event.target.value);
     });
-    document.addEventListener('keydown', function (pressEvent) {
+    document.addEventListener('keydown', (pressEvent) => {
         //console.log(pressEvent.key);
         //console.log("keyboard pressed:", layoutMap[game.layout][pressEvent.key]);
         keyPressInterpret(layoutMap[game.layout][pressEvent.key]);
         heldDownKey[layoutMap[game.layout][pressEvent.key]] = true;
     });
-    document.addEventListener('keyup', function (pressEvent) {
+    document.addEventListener('keyup', (pressEvent) => {
         //console.log("keyboard released:", layoutMap[game.layout][pressEvent.key]);
         heldDownKey[layoutMap[game.layout][pressEvent.key]] = false;
     });
@@ -140,7 +140,7 @@ function showThisHideThat(showThis, hideThat) {
 function toggleLabelVisibility() {
     game.labelsVisible = !game.labelsVisible;
     $("labelVisibilityCheckbox").checked = game.labelsVisible;
-    document.querySelectorAll('.label-bg').forEach(function (bg) {
+    document.querySelectorAll('.label-bg').forEach(bg => {
         bg.classList.add('hidden');
         if (game.labelsVisible) {
             bg.classList.remove('hidden');
@@ -166,7 +166,7 @@ function toggleLabelVisibility() {
     }
 }
 function generateKeyElement(info, id) {
-    var svg = document.createElementNS(svgNameSpace, 'svg');
+    const svg = document.createElementNS(svgNameSpace, 'svg');
     svg.setAttribute('version', '1.1');
     svg.setAttribute('baseProfile', 'full');
     svg.setAttribute('viewBox', '0 0 62 302');
@@ -177,19 +177,19 @@ function generateKeyElement(info, id) {
     //blur.setAttribute('stdDeviation', '4');
     //blur.setAttribute('result', 'blur');
     //defs.append(blur);
-    var color = [info.hues[id], info.sat, info.light];
-    var svgBg = drawRect(62, 302, color);
-    svgBg.setAttribute('transform', "translate(" + 62 / 2 + "," + 302 / 2 + ")");
-    var animateRect = svgBg.cloneNode();
+    const color = [info.hues[id], info.sat, info.light];
+    const svgBg = drawRect(62, 302, color);
+    svgBg.setAttribute('transform', `translate(${62 / 2},${302 / 2})`);
+    const animateRect = svgBg.cloneNode();
     animateRect.classList.add('key-animate-layer');
-    animateRect.setAttribute('fill', "hsl(" + color[0] + ", " + color[1] + "%, " + (color[2] + 35) + "%)");
+    animateRect.setAttribute('fill', `hsl(${color[0]}, ${color[1]}%, ${color[2] + 35}%)`);
     animateRect.setAttribute('opacity', '0');
     svg.append(svgBg, animateRect);
-    var qwertyLabel = addText(getKeyByValue(layoutMap.qwerty, id), "qwerty");
+    const qwertyLabel = addText(getKeyByValue(layoutMap.qwerty, id), "qwerty");
     labelElements.qwerty.push(qwertyLabel);
-    var dvorakLabel = addText(getKeyByValue(layoutMap.dvorak, id), "dvorak");
+    const dvorakLabel = addText(getKeyByValue(layoutMap.dvorak, id), "dvorak");
     labelElements.dvorak.push(dvorakLabel);
-    var labelBg = drawRect(40, 60, [0, 0, 0]);
+    const labelBg = drawRect(40, 60, [0, 0, 0]);
     labelBg.setAttribute('transform', 'translate(31, 259)');
     labelBg.setAttribute('rx', '13');
     labelBg.setAttribute('ry', '13');
@@ -204,17 +204,17 @@ function generateKeyElement(info, id) {
     return svg;
 }
 function drawRect(width, height, inputColor) {
-    var rect = document.createElementNS(svgNameSpace, 'rect');
-    var color = "hsl(" + inputColor[0] + ", " + inputColor[1] + "%, " + inputColor[2] + "%)";
-    rect.setAttribute('x', "-" + width / 2);
-    rect.setAttribute('y', "-" + height / 2);
+    const rect = document.createElementNS(svgNameSpace, 'rect');
+    const color = `hsl(${inputColor[0]}, ${inputColor[1]}%, ${inputColor[2]}%)`;
+    rect.setAttribute('x', `-${width / 2}`);
+    rect.setAttribute('y', `-${height / 2}`);
     rect.setAttribute('width', width);
     rect.setAttribute('height', height);
     rect.setAttribute('fill', color);
     return rect;
 }
 function addText(text, labelgroup) {
-    var textElement = document.createElementNS(svgNameSpace, 'text');
+    const textElement = document.createElementNS(svgNameSpace, 'text');
     textElement.setAttribute('x', '21');
     textElement.setAttribute('y', '270');
     textElement.textContent = text;
@@ -222,7 +222,7 @@ function addText(text, labelgroup) {
     return textElement;
 }
 function generateKeyboard() {
-    var blackInfo = {
+    const blackInfo = {
         ids: [1, 3, -1, 6, 8, 10],
         hues: {
             1: 205,
@@ -235,7 +235,7 @@ function generateKeyboard() {
         light: 29,
         natural: false
     };
-    var whiteInfo = {
+    const whiteInfo = {
         ids: [0, 2, 4, 5, 7, 9, 11, 12],
         hues: {
             0: 0,
@@ -251,9 +251,9 @@ function generateKeyboard() {
         light: 59,
         natural: true
     };
-    blackInfo.ids.forEach(function (id) {
-        var key = generateKeyElement(blackInfo, id);
-        key.addEventListener("click", function () {
+    blackInfo.ids.forEach((id) => {
+        const key = generateKeyElement(blackInfo, id);
+        key.addEventListener("click", () => {
             //console.log("manual input: ", id);
             keyPressInterpret(id);
         });
@@ -261,13 +261,13 @@ function generateKeyboard() {
         $("blackRow").appendChild(key);
     });
     $('key-1').classList.add('hidden-key');
-    var keyCopy1 = $('key-1').cloneNode();
-    var keyCopy2 = $('key-1').cloneNode();
+    const keyCopy1 = $('key-1').cloneNode();
+    const keyCopy2 = $('key-1').cloneNode();
     $("blackRow").appendChild(keyCopy1);
     $("blackRow").appendChild(keyCopy2);
-    whiteInfo.ids.forEach(function (id) {
-        var key = generateKeyElement(whiteInfo, id);
-        key.addEventListener("click", function () {
+    whiteInfo.ids.forEach((id) => {
+        const key = generateKeyElement(whiteInfo, id);
+        key.addEventListener("click", () => {
             //console.log("manual input: ", id);
             keyPressInterpret(id);
         });
@@ -275,9 +275,9 @@ function generateKeyboard() {
     });
 }
 function keyAnimate(key) {
-    var keyAnimate = key.querySelector('.key-animate-layer');
+    const keyAnimate = key.querySelector('.key-animate-layer');
     keyAnimate.classList.remove('key-animate');
-    setTimeout(function () {
+    setTimeout(() => {
         keyAnimate.classList.add('key-animate');
     }, 23);
 }
@@ -318,9 +318,9 @@ function keyPressInterpret(idInput) {
     }
 }
 function generateSoundBank() {
-    for (var i = 0; i < 13; i++) {
-        var audioElement = new Howl({
-            src: ["./audio/organ" + i + ".ogg"]
+    for (let i = 0; i < 13; i++) {
+        const audioElement = new Howl({
+            src: [`public/audio/organ${i}.ogg`]
         });
         sounds.push(audioElement);
     }
@@ -349,7 +349,7 @@ function playChord(chord, step, speed) {
     }
 }
 function computerPlaySequence(sequence) {
-    var sequenceCopy = sequence.slice();
+    const sequenceCopy = sequence.slice();
     //console.log(sequenceCopy);
     hitKey(sequenceCopy.shift());
     if (sequenceCopy.length > 0) {
@@ -421,8 +421,8 @@ function gameOver() {
     game.secretSequence = [];
     console.log("you lose");
     // play that bad chord
-    var root = Math.floor(Math.random() * 13);
-    var badChord = [root];
+    const root = Math.floor(Math.random() * 13);
+    const badChord = [root];
     badChord.push((root + 6) % 13);
     badChord.push(Math.floor(Math.random() * 13));
     badChord.push((root + 1) % 13);

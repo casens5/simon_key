@@ -345,7 +345,7 @@ function keyPressInterpret(idInput: number) {
 function generateSoundBank() {
 	for (let i = 0; i < 13; i++) {
 		const audioElement = new Howl({
-			src: [`./audio/organ${i}.ogg`]
+			src: [`public/audio/organ${i}.ogg`]
 		});
 		sounds.push(audioElement);
 	}
