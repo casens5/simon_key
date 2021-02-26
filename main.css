@@ -74,7 +74,7 @@ html, body {
 
 .label {
   font-size: 41px;
-  fill: #facade;
+  fill: #fff;
   font-family: "Fantasque Sans Mono", monospace;
   margin-bottom: 23px;
   text-shadow: 0 0 2px #000, 0 0 8px #000, 0 0 13px #000;
