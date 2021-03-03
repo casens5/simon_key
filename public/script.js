@@ -94,25 +94,6 @@ function $(id) {
 function getKeyByValue(object, value) {
     return Object.keys(object).find(key => object[key] === value);
 }
-function addEventListeners() {
-    $("labelVisibilityCheckbox").addEventListener("change", toggleLabelVisibility);
-    $("newGameBtn").addEventListener("click", newGame);
-    $("freePlayBtn").addEventListener("click", freePlay);
-    $("replaySequenceBtn").addEventListener("click", replayComputerSequence);
-    $("layoutSelector").addEventListener("change", function (event) {
-        changeLayout(event.target.value);
-    });
-    document.addEventListener('keydown', (pressEvent) => {
-        //console.log(pressEvent.key);
-        //console.log("keyboard pressed:", layoutMap[game.layout][pressEvent.key]);
-        keyPressInterpret(layoutMap[game.layout][pressEvent.key]);
-        heldDownKey[layoutMap[game.layout][pressEvent.key]] = true;
-    });
-    document.addEventListener('keyup', (pressEvent) => {
-        //console.log("keyboard released:", layoutMap[game.layout][pressEvent.key]);
-        heldDownKey[layoutMap[game.layout][pressEvent.key]] = false;
-    });
-}
 function changeLayout(newLayout) {
     console.log("switch keyboard to", newLayout);
     $("layoutSelector").value = newLayout;
@@ -208,8 +189,8 @@ function drawRect(width, height, inputColor) {
     const color = `hsl(${inputColor[0]}, ${inputColor[1]}%, ${inputColor[2]}%)`;
     rect.setAttribute('x', `-${width / 2}`);
     rect.setAttribute('y', `-${height / 2}`);
-    rect.setAttribute('width', width);
-    rect.setAttribute('height', height);
+    rect.setAttribute('width', `${width}`);
+    rect.setAttribute('height', `${height}`);
     rect.setAttribute('fill', color);
     return rect;
 }
@@ -261,10 +242,6 @@ function generateKeyboard() {
         $("blackRow").appendChild(key);
     });
     $('key-1').classList.add('hidden-key');
-    const keyCopy1 = $('key-1').cloneNode();
-    const keyCopy2 = $('key-1').cloneNode();
-    $("blackRow").appendChild(keyCopy1);
-    $("blackRow").appendChild(keyCopy2);
     whiteInfo.ids.forEach((id) => {
         const key = generateKeyElement(whiteInfo, id);
         key.addEventListener("click", () => {
@@ -428,6 +405,25 @@ function gameOver() {
     badChord.push((root + 1) % 13);
     badChord.push((root + 7) % 13);
     playChord(badChord, 0, 73);
+}
+function addEventListeners() {
+    $("labelVisibilityCheckbox").addEventListener("change", toggleLabelVisibility);
+    $("newGameBtn").addEventListener("click", newGame);
+    $("freePlayBtn").addEventListener("click", freePlay);
+    $("replaySequenceBtn").addEventListener("click", replayComputerSequence);
+    $("layoutSelector").addEventListener("change", function (event) {
+        changeLayout(event.target.value);
+    });
+    document.addEventListener('keydown', (pressEvent) => {
+        //console.log(pressEvent.key);
+        //console.log("keyboard pressed:", layoutMap[game.layout][pressEvent.key]);
+        keyPressInterpret(layoutMap[game.layout][pressEvent.key]);
+        heldDownKey[layoutMap[game.layout][pressEvent.key]] = true;
+    });
+    document.addEventListener('keyup', (pressEvent) => {
+        //console.log("keyboard released:", layoutMap[game.layout][pressEvent.key]);
+        heldDownKey[layoutMap[game.layout][pressEvent.key]] = false;
+    });
 }
 function main() {
     addEventListeners();

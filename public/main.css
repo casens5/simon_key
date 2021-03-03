@@ -48,11 +48,12 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 .music-keyboard {
   display: grid;
-  grid-template-rows: 160px 320px;
+  grid-template-rows: 33% 67%;
   height: 100%;
   width: 100%;
   max-width: 640px;
@@ -97,6 +98,11 @@ html, body {
   position: relative;
   left: 6.4%;
   height: 200%;
+  width: 75%;
+}
+
+.black-key {
+  margin: 1.87%;
 }
 
 .hidden-key {

@@ -22,11 +22,11 @@ const heldDownKey = {
 };
 const labelElements = {
 	// fill after keyboard is generated
-  qwerty: [],
-  dvorak: [] 
+  qwerty: [] as SVGTextElement[],
+  dvorak: [] as SVGTextElement[]
 };
 const sounds = []
-const musicKeyElements = [];
+const musicKeyElements: SVGSVGElement[] = [];
 const chords = {
   win: [0, 4, 7, 12],
   //freePlay: [0, 11, 2, 9, 4, 7, 6, 5, 8, 3, 10, 1, 12]
@@ -81,7 +81,7 @@ const layoutMap = {
 };
 const game = {
   score: 0,
-  secretSequence: [],
+  secretSequence: [] as number[],
   labelsVisible: false,
   layout: "qwerty",
   playerTurn: true,
@@ -91,35 +91,15 @@ const game = {
 };
 const svgNameSpace = 'http://www.w3.org/2000/svg';
 
-function $(id: string) {
+function $(id: string) : HTMLElement {
   return document.getElementById(id);
 }
 
-function getKeyByValue(object, value) {
+function getKeyByValue(object, value) : any {
   return Object.keys(object).find(key => object[key] === value);
 }
 
-function addEventListeners() {
-	$("labelVisibilityCheckbox").addEventListener("change", toggleLabelVisibility);
-	$("newGameBtn").addEventListener("click", newGame);
-	$("freePlayBtn").addEventListener("click", freePlay);
-	$("replaySequenceBtn").addEventListener("click", replayComputerSequence);
-	$("layoutSelector").addEventListener("change", function(event) {
-		changeLayout(event.target.value);
-	});
-	document.addEventListener('keydown', (pressEvent) => {
-		//console.log(pressEvent.key);
-		//console.log("keyboard pressed:", layoutMap[game.layout][pressEvent.key]);
-		keyPressInterpret(layoutMap[game.layout][pressEvent.key]);
-		heldDownKey[layoutMap[game.layout][pressEvent.key]] = true
-	});
-	document.addEventListener('keyup', (pressEvent) => {
-		//console.log("keyboard released:", layoutMap[game.layout][pressEvent.key]);
-		heldDownKey[layoutMap[game.layout][pressEvent.key]] = false
-	});
-}
-
-function changeLayout(newLayout: string) {
+function changeLayout(newLayout: string) : void {
 	console.log("switch keyboard to", newLayout);
 	$("layoutSelector").value = newLayout;
 	if (newLayout === "qwerty") {
@@ -135,7 +115,7 @@ function changeLayout(newLayout: string) {
 	}
 }
 
-function showThisHideThat(showThis, hideThat) {
+function showThisHideThat(showThis, hideThat) : void {
 	showThis.forEach(function(node) {
 		node.classList.remove("hidden");
 	});
@@ -144,7 +124,7 @@ function showThisHideThat(showThis, hideThat) {
 	});
 }
 
-function toggleLabelVisibility() {
+function toggleLabelVisibility() : void {
   game.labelsVisible = !game.labelsVisible;
 	$("labelVisibilityCheckbox").checked = game.labelsVisible
 	document.querySelectorAll('.label-bg').forEach(bg => {
@@ -172,7 +152,7 @@ function toggleLabelVisibility() {
   }
 }
 
-function generateKeyElement(info, id: number) {
+function generateKeyElement(info, id: number) : SVGSVGElement {
 	const svg = document.createElementNS(svgNameSpace, 'svg');
 	svg.setAttribute('version', '1.1');
 	svg.setAttribute('baseProfile', 'full');
@@ -184,21 +164,21 @@ function generateKeyElement(info, id: number) {
 	//blur.setAttribute('stdDeviation', '4');
 	//blur.setAttribute('result', 'blur');
 	//defs.append(blur);
-	const color = [info.hues[id], info.sat, info.light];
+	const color: number[] = [info.hues[id], info.sat, info.light];
 	const svgBg = drawRect(62, 302, color);
 	svgBg.setAttribute('transform', `translate(${62/2},${302/2})`);
-	const animateRect = svgBg.cloneNode();
+	const animateRect = <SVGRectElement> svgBg.cloneNode();
 	animateRect.classList.add('key-animate-layer');
 	animateRect.setAttribute('fill', `hsl(${color[0]}, ${color[1]}%, ${color[2] + 35}%)`);
 	animateRect.setAttribute('opacity', '0');
 	svg.append(svgBg, animateRect);
 
-  const qwertyLabel = addText(
+  const qwertyLabel: SVGTextElement = addText(
     getKeyByValue(layoutMap.qwerty, id),
     "qwerty"
   );
 	labelElements.qwerty.push(qwertyLabel);
-  const dvorakLabel = addText(
+  const dvorakLabel: SVGTextElement = addText(
     getKeyByValue(layoutMap.dvorak, id),
     "dvorak"
   );
@@ -220,19 +200,19 @@ function generateKeyElement(info, id: number) {
 	return svg;
 }
 
-function drawRect(width, height, inputColor) {
-	const rect = document.createElementNS(svgNameSpace, 'rect');
+function drawRect(width: number, height: number, inputColor: number[]): SVGRectElement {
+	const rect: SVGRectElement = document.createElementNS(svgNameSpace, 'rect');
 	const color = `hsl(${inputColor[0]}, ${inputColor[1]}%, ${inputColor[2]}%)`;
 	rect.setAttribute('x', `-${width / 2}`);
 	rect.setAttribute('y', `-${height / 2}`);
-	rect.setAttribute('width', width);
-	rect.setAttribute('height', height);
+	rect.setAttribute('width', `${width}`);
+	rect.setAttribute('height', `${height}`);
 	rect.setAttribute('fill', color);
 	return rect;
 }
 
 function addText(text, labelgroup) {
-	const textElement: text = document.createElementNS(svgNameSpace, 'text');
+	const textElement = document.createElementNS(svgNameSpace, 'text');
 	textElement.setAttribute('x', '21');
 	textElement.setAttribute('y', '270');
 	textElement.textContent = text;
@@ -240,7 +220,7 @@ function addText(text, labelgroup) {
 	return textElement;
 }
 
-function generateKeyboard() {
+function generateKeyboard() : void {
   const blackInfo = {
     ids: [1, 3, -1, 6, 8, 10],
     hues: {
@@ -282,10 +262,6 @@ function generateKeyboard() {
   });
 
 	$('key-1').classList.add('hidden-key');
-	const keyCopy1 = $('key-1').cloneNode();
-	const keyCopy2 = $('key-1').cloneNode();
-	$("blackRow").appendChild(keyCopy1);
-	$("blackRow").appendChild(keyCopy2);
 
   whiteInfo.ids.forEach( (id) => {
     const key = generateKeyElement(whiteInfo, id);
@@ -297,7 +273,7 @@ function generateKeyboard() {
   });
 }
 
-function keyAnimate(key) {
+function keyAnimate(key) : void {
 	const keyAnimate = key.querySelector('.key-animate-layer')
 	keyAnimate.classList.remove('key-animate');
     setTimeout(() => {
@@ -305,7 +281,7 @@ function keyAnimate(key) {
 		}, 23);
 }
 
-function keyPressInterpret(idInput: number) {
+function keyPressInterpret(idInput: number) : any {
 	if (heldDownKey[idInput]) {
 		return;
 	}
@@ -342,7 +318,7 @@ function keyPressInterpret(idInput: number) {
   }
 }
 
-function generateSoundBank() {
+function generateSoundBank() : void {
 	for (let i = 0; i < 13; i++) {
 		const audioElement = new Howl({
 			src: [`public/audio/organ${i}.ogg`]
@@ -351,12 +327,12 @@ function generateSoundBank() {
 	}
 }
 
-function hitKey(keyId: number) {
+function hitKey(keyId: number) : void {
 	keyAnimate(musicKeyElements[keyId]);
 	sounds[keyId].play();
 }
 
-function checkMatchingNotes(keyId: number) {
+function checkMatchingNotes(keyId: number) : void {
   if (game.secretSequence[game.playerSequenceIndex] !== keyId) {
     gameOver();
   } else if (game.playerSequenceIndex === game.secretSequence.length - 1) {
@@ -367,7 +343,7 @@ function checkMatchingNotes(keyId: number) {
   }
 }
 
-function playChord(chord: number[], step: number, speed: number) {
+function playChord(chord: number[], step: number, speed: number) : void {
   hitKey(chord[step]);
   step++;
   if (step < chord.length) {
@@ -375,7 +351,7 @@ function playChord(chord: number[], step: number, speed: number) {
   }
 }
 
-function computerPlaySequence(sequence: number[]) {
+function computerPlaySequence(sequence: number[]) : void {
   const sequenceCopy = sequence.slice();
   //console.log(sequenceCopy);
   hitKey(sequenceCopy.shift());
@@ -386,7 +362,7 @@ function computerPlaySequence(sequence: number[]) {
   }
 }
 
-function replayComputerSequence() {
+function replayComputerSequence() : void {
   if (game.playerSequenceIndex !== 0 || 
 			game.secretSequence[0] === undefined) {
 		return;
@@ -398,7 +374,7 @@ function replayComputerSequence() {
 	computerPlaySequence(game.secretSequence);
 }
 
-function correctSequence() {
+function correctSequence() : void {
   game.playerTurn = false;
   $("container").className = "bg-computer-turn";
   //console.log("good job bud");
@@ -408,7 +384,7 @@ function correctSequence() {
   setTimeout(computerTurn, 1849);
 }
 
-function freePlay() {
+function freePlay() : void {
   $("container").className = "bg-free-play";
   console.log("play however you like.  there is no rush");
   game.secretSequence = [];
@@ -419,7 +395,7 @@ function freePlay() {
   $("scoreDisplay").textContent = null;
 }
 
-function newGame() {
+function newGame() : void {
   game.playerTurn = false;
   game.freePlay = false;
   $("container").className = "bg-computer-turn";
@@ -431,7 +407,7 @@ function newGame() {
   setTimeout(computerTurn, 987);
 }
 
-function playerTurn() {
+function playerTurn() : void {
   setTimeout(function() {
     $("container").className = "bg-player-turn";
     game.playerTurn = true;
@@ -439,7 +415,7 @@ function playerTurn() {
   //console.log("now's your turn");
 }
 
-function computerTurn() {
+function computerTurn() : void {
   //console.log("now's the computer's turn");
   game.playerTurn = false;
   game.playerSequenceIndex = 0;
@@ -448,7 +424,7 @@ function computerTurn() {
   computerPlaySequence(game.secretSequence);
 }
 
-function gameOver() {
+function gameOver() : void {
   game.playerTurn = false;
   $("container").className = "bg-game-over";
   game.secretSequence = [];
@@ -463,7 +439,27 @@ function gameOver() {
   playChord(badChord, 0, 73);
 }
 
-function main() {
+function addEventListeners() : void {
+	$("labelVisibilityCheckbox").addEventListener("change", toggleLabelVisibility);
+	$("newGameBtn").addEventListener("click", newGame);
+	$("freePlayBtn").addEventListener("click", freePlay);
+	$("replaySequenceBtn").addEventListener("click", replayComputerSequence);
+	$("layoutSelector").addEventListener("change", function(event) {
+		changeLayout(event.target.value);
+	});
+	document.addEventListener('keydown', (pressEvent) => {
+		//console.log(pressEvent.key);
+		//console.log("keyboard pressed:", layoutMap[game.layout][pressEvent.key]);
+		keyPressInterpret(layoutMap[game.layout][pressEvent.key]);
+		heldDownKey[layoutMap[game.layout][pressEvent.key]] = true
+	});
+	document.addEventListener('keyup', (pressEvent) => {
+		//console.log("keyboard released:", layoutMap[game.layout][pressEvent.key]);
+		heldDownKey[layoutMap[game.layout][pressEvent.key]] = false
+	});
+}
+
+function main() : void {
 	addEventListeners();
 	generateKeyboard();
 	generateSoundBank();
