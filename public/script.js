@@ -44,11 +44,11 @@ const layoutMap = {
         r: 10,
         n: 11,
         s: 12,
-        w: 20,
-        v: 21,
+        ";": 20,
+        q: 21,
         m: 22,
-        b: 24,
-        x: 25 // replaySequence
+        w: 24,
+        j: 25 // replaySequence
     },
     // alternate key input that might be good UX but idk
     permissiveDvorak: {
@@ -70,11 +70,11 @@ const layoutMap = {
         o: 10,
         l: 11,
         ";": 12,
-        ",": 20,
-        ".": 21,
+        z: 20,
+        x: 21,
         m: 23,
-        n: 24,
-        b: 25 // replaySequence
+        ",": 24,
+        c: 25 // replaySequence
     }
 };
 const game = {
@@ -85,14 +85,19 @@ const game = {
     playerTurn: true,
     computerTempo: 784,
     playerSequenceIndex: 0,
-    freePlay: true
+    freePlay: true,
+    clock: setTimeout(() => { }, 0)
 };
 const svgNameSpace = 'http://www.w3.org/2000/svg';
 function $(id) {
     return document.getElementById(id);
 }
+function nop() { }
 function getKeyByValue(object, value) {
     return Object.keys(object).find(key => object[key] === value);
+}
+function clearClock() {
+    game.clock = setTimeout(() => { }, 0);
 }
 function changeLayout(newLayout) {
     console.log("switch keyboard to", newLayout);
@@ -312,17 +317,20 @@ function checkMatchingNotes(keyId) {
     }
     else if (game.playerSequenceIndex === game.secretSequence.length - 1) {
         game.playerTurn = false;
-        setTimeout(correctSequence, 233);
+        game.clock = setTimeout(correctSequence, 233);
     }
     else {
         game.playerSequenceIndex++;
     }
 }
-function playChord(chord, step, speed) {
+function playChord(chord, step, speed, callback) {
     hitKey(chord[step]);
     step++;
     if (step < chord.length) {
-        setTimeout(playChord, speed, chord, step, speed);
+        game.clock = setTimeout(playChord, speed, chord, step, speed, callback);
+    }
+    else {
+        callback();
     }
 }
 function computerPlaySequence(sequence) {
@@ -330,7 +338,7 @@ function computerPlaySequence(sequence) {
     //console.log(sequenceCopy);
     hitKey(sequenceCopy.shift());
     if (sequenceCopy.length > 0) {
-        setTimeout(computerPlaySequence, game.computerTempo, sequenceCopy);
+        game.clock = setTimeout(computerPlaySequence, game.computerTempo, sequenceCopy);
     }
     else {
         playerTurn();
@@ -341,6 +349,7 @@ function replayComputerSequence() {
         game.secretSequence[0] === undefined) {
         return;
     }
+    clearTimeout(game.clock);
     //console.log(game.secretSequence);
     //console.log(game.playerSequenceIndex);
     game.playerTurn = false;
@@ -351,13 +360,16 @@ function correctSequence() {
     game.playerTurn = false;
     $("container").className = "bg-computer-turn";
     //console.log("good job bud");
-    setTimeout(playChord, 233, chords.win, 0, 73);
     game.score++;
     $("scoreDisplay").textContent = String(game.score);
-    setTimeout(computerTurn, 1849);
+    game.clock = setTimeout(playChord, 233, chords.win, 0, 73, () => {
+        game.clock = setTimeout(computerTurn, 1849);
+    });
 }
 function freePlay() {
+    clearTimeout(game.clock);
     $("container").className = "bg-free-play";
+    $("replaySequenceBtn").classList.add("hidden");
     console.log("play however you like.  there is no rush");
     game.secretSequence = [];
     game.playerSequenceIndex = 0;
@@ -367,18 +379,20 @@ function freePlay() {
     $("scoreDisplay").textContent = null;
 }
 function newGame() {
+    clearTimeout(game.clock);
     game.playerTurn = false;
     game.freePlay = false;
     $("container").className = "bg-computer-turn";
+    $("replaySequenceBtn").classList.remove("hidden");
     console.log("start new game!!!");
     game.secretSequence = [];
     game.playerSequenceIndex = 0;
     game.score = 0;
     $("scoreDisplay").textContent = String(game.score);
-    setTimeout(computerTurn, 987);
+    game.clock = setTimeout(computerTurn, 987);
 }
 function playerTurn() {
-    setTimeout(function () {
+    game.clock = setTimeout(function () {
         $("container").className = "bg-player-turn";
         game.playerTurn = true;
     }, 377);
@@ -404,7 +418,7 @@ function gameOver() {
     badChord.push(Math.floor(Math.random() * 13));
     badChord.push((root + 1) % 13);
     badChord.push((root + 7) % 13);
-    playChord(badChord, 0, 73);
+    playChord(badChord, 0, 73, nop);
 }
 function addEventListeners() {
     $("labelVisibilityCheckbox").addEventListener("change", toggleLabelVisibility);
