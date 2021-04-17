@@ -3,7 +3,12 @@
 		"target": "es6",
 		"outDir": "./public",
 		"rootDir": "./src",
-	}
+		"allowJs": true,
+		"strictNullChecks": true
+	},
+	"files": [
+		"src/howler.core.min.js"
+	]
 }
 
 

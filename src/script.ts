@@ -102,13 +102,9 @@ function getKeyByValue(object, value) : any {
   return Object.keys(object).find(key => object[key] === value);
 }
 
-function clearClock() {
-  game.clock = setTimeout(() => {}, 0);
-}
-
 function changeLayout(newLayout: string) : void {
 	console.log("switch keyboard to", newLayout);
-	$("layoutSelector").value = newLayout;
+	(<HTMLInputElement>$("layoutSelector")).value = newLayout;
 	if (newLayout === "qwerty") {
 		game.layout = "qwerty";
 		if (game.labelsVisible) {
@@ -133,7 +129,7 @@ function showThisHideThat(showThis, hideThat) : void {
 
 function toggleLabelVisibility() : void {
   game.labelsVisible = !game.labelsVisible;
-	$("labelVisibilityCheckbox").checked = game.labelsVisible
+	(<HTMLInputElement>$("labelVisibilityCheckbox")).checked = game.labelsVisible
 	document.querySelectorAll('.label-bg').forEach(bg => {
 		bg.classList.add('hidden');
 		if (game.labelsVisible) {
@@ -165,12 +161,6 @@ function generateKeyElement(info, id: number) : SVGSVGElement {
 	svg.setAttribute('baseProfile', 'full');
 	svg.setAttribute('viewBox', '0 0 62 302');
 	svg.setAttribute('preserveAspectRatio', "none");
-	//const defs = document.createElementNS(svgNameSpace, 'defs');
-	//const blur = document.createElementNS(svgNameSpace, 'feGaussianBlur');
-	//blur.setAttribute('in', 'SourceAlpha');
-	//blur.setAttribute('stdDeviation', '4');
-	//blur.setAttribute('result', 'blur');
-	//defs.append(blur);
 	const color: number[] = [info.hues[id], info.sat, info.light];
 	const svgBg = drawRect(62, 302, color);
 	svgBg.setAttribute('transform', `translate(${62/2},${302/2})`);
@@ -201,24 +191,22 @@ function generateKeyElement(info, id: number) : SVGSVGElement {
 
   svg.id = "key" + id;
   svg.classList.add("key");
-  svg.color = color
-  svg.natural = info.natural;
   musicKeyElements[id] = svg;
 	return svg;
 }
 
-function drawRect(width: number, height: number, inputColor: number[]): SVGRectElement {
-	const rect: SVGRectElement = document.createElementNS(svgNameSpace, 'rect');
+function drawRect(width: number, height: number, inputColor: number[]) : SVGRectElement {
+	const rect = document.createElementNS(svgNameSpace, 'rect');
 	const color = `hsl(${inputColor[0]}, ${inputColor[1]}%, ${inputColor[2]}%)`;
-	rect.setAttribute('x', `-${width / 2}`);
-	rect.setAttribute('y', `-${height / 2}`);
-	rect.setAttribute('width', `${width}`);
-	rect.setAttribute('height', `${height}`);
+	rect.setAttribute('x', String(-width / 2));
+	rect.setAttribute('y', String(-height / 2));
+	rect.setAttribute('width', String(width));
+	rect.setAttribute('height', String(height));
 	rect.setAttribute('fill', color);
 	return rect;
 }
 
-function addText(text, labelgroup) {
+function addText(text, labelgroup) : SVGTextElement {
 	const textElement = document.createElementNS(svgNameSpace, 'text');
 	textElement.setAttribute('x', '21');
 	textElement.setAttribute('y', '270');
@@ -231,15 +219,14 @@ function generateKeyboard() : void {
   const blackInfo = {
     ids: [1, 3, -1, 6, 8, 10],
     hues: {
-      1: 205,
+      1: 206,
       3: 257,
       6: 0,
-      8: 52,
+      8: 51,
       10: 103
     },
     sat: 55,
     light: 29,
-    natural: false
   };
   const whiteInfo = {
     ids: [0, 2, 4, 5, 7, 9, 11, 12],
@@ -250,12 +237,11 @@ function generateKeyboard() : void {
       5: 154,
       7: 206,
       9: 257,
-      11: 308,
+      11: 309,
       12: 0
     },
     sat: 27,
     light: 59,
-    natural: true
   };
 
   blackInfo.ids.forEach( (id) => {
@@ -288,7 +274,7 @@ function keyAnimate(key) : void {
 	}, 23);
 }
 
-function keyPressInterpret(idInput: number) : any {
+function keyPressInterpret(idInput: number) : void {
 	if (heldDownKey[idInput]) {
 		return;
 	}
@@ -350,7 +336,7 @@ function checkMatchingNotes(keyId: number) : void {
   }
 }
 
-function playChord(chord: number[], step: number, speed: number, callback) : void {
+function playChord(chord: number[], step: number, speed: number, callback : () => void) : void {
   hitKey(chord[step]);
   step++;
   if (step < chord.length) {
@@ -461,7 +447,7 @@ function addEventListeners() : void {
 	$("freePlayBtn").addEventListener("click", freePlay);
 	$("replaySequenceBtn").addEventListener("click", replayComputerSequence);
 	$("layoutSelector").addEventListener("change", function(event) {
-		changeLayout(event.target.value);
+		changeLayout((<HTMLInputElement>event.target).value);
 	});
 	document.addEventListener('keydown', (pressEvent) => {
 		//console.log(pressEvent.key);
