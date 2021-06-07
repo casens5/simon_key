@@ -1,3 +1,4 @@
 todo.txt
 *.swp
 .sass-cache*
+src/howler.core.min.js
